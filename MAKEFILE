@@ -3,8 +3,8 @@
 # =============================================================================
 
 # Settings - Edit the names of the object and executable files.
-objects1 = HELLO.obj
-dest = HELLO.exe
+objects1 = game.obj main.obj player.obj drawer.obj crate.obj 
+dest = lazarus.exe
 
 # =============================================================================
 # Do NOT edit this section, unless you know what you are doing.
