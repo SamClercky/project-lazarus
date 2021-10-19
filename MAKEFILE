@@ -14,7 +14,7 @@ dest = lazarus.exe
   tasm /ml /m2 /w2 /z /zi $<
 
 $(dest): $(objects1)
-  wlink option quiet system pmodew name $@ file {$(objects1)}
+  wlink option quiet system pmodew name $@ file *.obj
 
 clean: .symbolic
   del *.obj
@@ -22,5 +22,5 @@ clean: .symbolic
 
 .silent
 debug: $(objects1) .symbolic
-  wlink debug watcom all option quiet system pmodew name $(dest) file {$(objects1)}
+  wlink debug watcom all option quiet system pmodew name $(dest) file *.obj
   wd /tr=rsi /li=43 $(dest)
