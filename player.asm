@@ -10,18 +10,19 @@ include "drawer.inc"
 CODESEG
 
 PROC Player_draw
+    USES eax, esi
     mov esi, offset player
     call Drawer_draw, offset player
 
-    inc [(Drawable PTR esi).x]
+    mov ax, [(Drawable PTR esi).x]
+    inc ax
+    mov [(Drawable PTR esi).x], ax
+
     ret
 ENDP
 
 DATASEG
-player Drawable <20,100,10,10,offset playerData>
-label playerData Byte
-rept 100
-    db 0Fh
-endm
+player Drawable <0,0,10,20,offset playerData>
+playerData db 100 DUP(0Ch)
 
 end

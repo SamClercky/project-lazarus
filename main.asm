@@ -62,6 +62,9 @@ start:
     call waitForVBI
     call Drawer_bg
     call Player_draw
+
+    ;; update screen
+    call Drawer_update
     
     ;; check if ending
     mov ah, 01h

@@ -35,7 +35,7 @@ PROC Drawer_bg
     ;; basic temp impl for testing
     ;; draw white pixels to screen (1 at a time)
     
-    mov edi, WINDOW_BUFFER
+    mov edi, offset back_buffer
     mov ecx, WINDOW_WIDTH*WINDOW_HEIGHT
     mov al, 0Fh ; color
     rep stosb
@@ -46,7 +46,7 @@ ENDP
 ;; Draws a drawable on screen at the given coords
 PROC Drawer_draw
     ARG @@drawable_ptr:dword
-    USES ecx, eax, ebx, edx, edi, esi
+    USES eax, ebx, ecx, edx, edi, esi
     
     mov ebx, [@@drawable_ptr] ; deref in ebx
 
@@ -58,11 +58,18 @@ PROC Drawer_draw
     sub ax, cx
     cmp ax, WINDOW_HEIGHT
     jge @@return ; if no longer on screen, end drawing
-
-    ;; calc source in relative data (height)
+    
+    ;; calc dest in relative data (height)
     mov edx, WINDOW_WIDTH
     mul edx ; mul line number (eax) with width
-    mov esi, eax ; result of mul in edx:eax
+    mov edi, eax ; result of mul in edx:eax
+
+    ;; calc source in relative data (height)
+    mov ax, [(Drawable PTR ebx).height]
+    sub ax, cx
+    mov dx, [(Drawable PTR ebx).width]
+    mul edx
+    mov esi, eax
 
     push cx ; remember for next time
     
@@ -73,14 +80,13 @@ PROC Drawer_draw
     mov ecx, eax ; take the smallest and put it in ecx
     
     ;; calc source based on width
-    add si, [(Drawable PTR ebx).x]
-
-    ;; copy rel to dest
-    mov edi, esi
+    mov dx, [(Drawable PTR ebx).x]
+    add di, dx
+    add si, dx
 
     ;; make absolute
     add esi, [(Drawable PTR ebx).data_ptr]
-    add edi, WINDOW_BUFFER
+    add edi, offset back_buffer
 
     ;; draw 1 line
     rep movsb
@@ -109,5 +115,21 @@ PROC Min
     ret
 ENDP
 
-end
+;; updates screen
+PROC Drawer_update
+    USES esi, edi, ecx
 
+    mov esi, offset back_buffer
+    mov edi, WINDOW_BUFFER
+    mov ecx, WINDOW_WIDTH*WINDOW_HEIGHT/4
+
+    rep movsd
+
+    ret
+ENDP
+
+UDATASEG
+;; Writing to back buffer for less flicker
+back_buffer db WINDOW_WIDTH*WINDOW_HEIGHT DUP(?)
+
+end
