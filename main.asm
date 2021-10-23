@@ -13,27 +13,40 @@ P386
 MODEL FLAT, C
 ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
+include "drawer.inc"
+
 ; -------------------------------------------------------------------
 ; CODE
 ; -------------------------------------------------------------------
 CODESEG
 
+PROC end_prog
+    uses eax
+    
+    call disable_video
+    mov ax, 4c00h
+    int 21h
+
+    ret
+ENDP
+
 start:
      sti            ; set The Interrupt Flag => enable interrupts
      cld            ; clear The Direction Flag
 
-	; Print string.
-	mov ah, 09h
-	mov edx, offset msg
-	int 21h
+    ;; enable str ops
+    push ds
+    pop es
+    
+    call enable_video
+    call Drawer_bg
 
 	; Wait for keystroke and read character.
 	mov ah,00h
 	int 16h
+    call disable_video
 
-	; Terminate process with return code in response to a keystroke.
-    mov	ax,4C00h
-	int 	21h
+	call end_prog
 
 ; -------------------------------------------------------------------
 ; DATA
