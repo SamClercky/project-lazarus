@@ -82,7 +82,7 @@ PROC Drawer_draw
     ;; calc source based on width
     mov dx, [(Drawable PTR ebx).x]
     add di, dx
-    add si, dx
+    ;add si, dx
 
     ;; make absolute
     add esi, [(Drawable PTR ebx).data_ptr]
