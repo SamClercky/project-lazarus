@@ -3,7 +3,7 @@
 # =============================================================================
 
 # Settings - Edit the names of the object and executable files.
-objects1 = game.obj main.obj player.obj drawer.obj crate.obj 
+objects1 = game.obj main.obj player.obj drawer.obj crate.obj physics.obj
 dest = lazarus.exe
 
 # =============================================================================
