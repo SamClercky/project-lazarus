@@ -15,6 +15,7 @@ ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
 include "drawer.inc"
 include "player.inc"
+include "crate.inc"
 
 ; -------------------------------------------------------------------
 ; CODE
@@ -61,6 +62,7 @@ start:
 @@game_loop:
     call waitForVBI
     call Drawer_bg
+    call Crate_draw
     call Player_draw
 
     ;; update screen
