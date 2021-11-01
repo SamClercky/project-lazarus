@@ -5,8 +5,15 @@ ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
 include "crate.inc"
 include "drawer.inc"
+include "physics.inc"
 
 CODESEG
+
+PROC Crate_init
+    call Physics_add_static, OFFSET crate1
+
+    ret
+ENDP
 
 PROC Crate_draw
     USES esi

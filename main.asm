@@ -56,6 +56,10 @@ start:
     ;; enable str ops
     push ds
     pop es
+
+    ;; init players and crates
+    call Player_init
+    call Crate_init
     
     call enable_video
 

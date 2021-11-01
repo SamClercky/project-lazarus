@@ -10,12 +10,19 @@ include "physics.inc"
 
 CODESEG
 
+;; inits player and adds it to the physics engine
+PROC Player_init
+    call Physics_add_dynamic, OFFSET player
+
+    ret
+ENDP
+
 PROC Player_draw
     USES eax, esi
     mov esi, offset player
     call Drawer_draw, esi
 
-    call Physics_apply_gravity, esi, 1
+    call Physics_apply_gravity_with_collision, esi, 1
 
     ret
 ENDP
