@@ -11,7 +11,7 @@ CODESEG
 
 PROC Physics_add_static
     ARG @@drawer_ptr:dword
-    USES eax, esi
+    USES eax, esi, edi
 
     call Utils_get_next_active_index, OFFSET static_active, STATIC_OBJECT_MAX_COUNT
     cmp eax, -1
@@ -20,9 +20,9 @@ PROC Physics_add_static
     ;; set active
     call Utils_set_active, OFFSET static_active, eax, 1
     ;; not full
-    add eax, OFFSET static_objects
+    mov edi, OFFSET static_objects
     mov esi, [@@drawer_ptr]
-    mov [eax], esi
+    mov [edi + 4*eax], esi
 
 @@return:
     ret
@@ -30,7 +30,7 @@ ENDP
 
 PROC Physics_add_dynamic
     ARG @@drawer_ptr:dword
-    USES eax, esi
+    USES eax, esi, edi
 
     call Utils_get_next_active_index, OFFSET dynamic_active, DYNAMIC_OBJECT_MAX_COUNT
     cmp eax, -1
@@ -39,9 +39,9 @@ PROC Physics_add_dynamic
     ;; set active
     call Utils_set_active, OFFSET dynamic_active, eax, 1
     ;; not full
-    add eax, OFFSET dynamic_objects
+    mov edi, OFFSET dynamic_objects
     mov esi, [@@drawer_ptr]
-    mov [eax], esi
+    mov [edi + 4*eax], esi
 
 @@return:
     ret
@@ -107,7 +107,7 @@ PROC Physics_check_colliding
     
     ;; check collision
     mov edi, eax ; dest PTR currently in eax
-    call Physics_check_colliding, esi, [DWORD PTR edi], [@@direction]
+    call Physics_is_colliding, esi, [DWORD PTR edi], [@@direction]
     test eax, eax ; test if collision
     jz @@end_dyn ; if NULL -> no collision -> continue
     ;;; collision found
@@ -127,13 +127,13 @@ PROC Physics_check_colliding
 
     call Utils_get_if_active, OFFSET moving_active, OFFSET moving_objects, ecx
     test eax, eax ; test if active
-    jz @@end_static ; if NULL -> not active
+    jz @@end_mov ; if NULL -> not active
     
     ;; check collision
     mov edi, eax ; dest PTR currently in eax
-    call Physics_check_colliding, esi, [DWORD PTR edi], [@@direction]
+    call Physics_is_colliding, esi, [DWORD PTR edi], [@@direction]
     test eax, eax ; test if collision
-    jz @@end_static ; if NULL -> no collision -> continue
+    jz @@end_mov ; if NULL -> no collision -> continue
     ;;; collision found
     mov eax, [edi]
     pop ecx ; cleaing
@@ -181,7 +181,7 @@ PROC Physics_is_colliding
     cmp esi, edi
     jne @@not_equal
 
-    xor eax, 0
+    xor eax, eax
     jmp @@return
 
 @@not_equal:
@@ -203,6 +203,10 @@ PROC Physics_is_colliding
 
     ;; check up
 @@up:
+    ;; clean eax, ebx
+    xor eax, eax
+    xor ebx, ebx
+
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
     dec ebx ; getting up, but may lead to problems in the future
@@ -214,6 +218,10 @@ PROC Physics_is_colliding
 
     ;; check left
 @@left:
+    ;; clean eax, ebx
+    xor eax, eax
+    xor ebx, ebx
+
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
     inc ebx ; getting up, but may lead to problems in the future
@@ -224,6 +232,10 @@ PROC Physics_is_colliding
     jmp @@collision
 
 @@bottom:
+    ;; clean eax, ebx
+    xor eax, eax
+    xor ebx, ebx
+
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
     inc eax
@@ -235,6 +247,10 @@ PROC Physics_is_colliding
     jmp @@collision
 
 @@right:
+    ;; clean eax, ebx
+    xor eax, eax
+    xor ebx, ebx
+
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
     add ax, [(Drawable PTR esi).width]
@@ -246,6 +262,10 @@ PROC Physics_is_colliding
     jmp @@collision
     
 @@middle:
+    ;; clean eax, ebx
+    xor eax, eax
+    xor ebx, ebx
+
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
     inc eax
@@ -311,8 +331,8 @@ UDATASEG
 
 ;; storage pools for the physics engine
 ;; contains pointers to drawable objects
-moving_objects  db MOVING_OBJECT_MAX_COUNT  DUP(?) ; objects that move (playing + falling crates)
-static_objects  db STATIC_OBJECT_MAX_COUNT  DUP(?) ; objects that do not move
-dynamic_objects db DYNAMIC_OBJECT_MAX_COUNT DUP(?) ; objects that move but can change (fallen crates)
+moving_objects  dd MOVING_OBJECT_MAX_COUNT  DUP(?) ; objects that move (playing + falling crates)
+static_objects  dd STATIC_OBJECT_MAX_COUNT  DUP(?) ; objects that do not move
+dynamic_objects dd DYNAMIC_OBJECT_MAX_COUNT DUP(?) ; objects that move but can change (fallen crates)
 
 end

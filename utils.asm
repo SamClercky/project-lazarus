@@ -27,17 +27,17 @@ PROC Utils_set_active
     test eax, eax
     jnz @@one
 
-    mov eax, [esi]
+    mov al, [esi]
     not edx
     and eax, edx
     jmp @@write
 
 @@one:
-    mov eax, [esi]
+    mov al, [esi]
     or eax, edx
 
 @@write:
-    mov [esi], eax
+    mov [esi], al
 
     ret
 ENDP
@@ -99,12 +99,14 @@ ENDP
 ;; returns eax=NULL if none found otherwise data at source_array
 PROC Utils_get_if_active
     ARG @@active_array:dword, @@source_array:dword, @@index:dword
+    USES edi
 
     call Utils_is_active, [@@active_array], [@@index]
     test eax, eax
     jz @@not_active
-    mov eax, [@@source_array]
-    add eax, [@@index]
+    mov edi, [@@source_array]
+    mov eax, [@@index]
+    lea eax, [edi + 4*eax]
     jmp @@return
 
 @@not_active:
