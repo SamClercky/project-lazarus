@@ -17,6 +17,8 @@ PROC Physics_add_static
     cmp eax, -1
     je @@return ;; check if not full and fail silently
 
+    ;; set active
+    call Utils_set_active, OFFSET static_active, eax, 1
     ;; not full
     add eax, OFFSET static_objects
     mov esi, [@@drawer_ptr]
@@ -34,6 +36,8 @@ PROC Physics_add_dynamic
     cmp eax, -1
     je @@return ;; check if not full and fail silently
 
+    ;; set active
+    call Utils_set_active, OFFSET dynamic_active, eax, 1
     ;; not full
     add eax, OFFSET dynamic_objects
     mov esi, [@@drawer_ptr]
@@ -79,7 +83,7 @@ PROC Physics_check_colliding
     
     ;; check collision
     mov edi, eax ; dest PTR currently in eax
-    call Physics_check_colliding, esi, [DWORD PTR edi], [@@direction]
+    call Physics_is_colliding, esi, [DWORD PTR edi], [@@direction]
     test eax, eax ; test if collision
     jz @@end_static ; if NULL -> no collision -> continue
     ;;; collision found

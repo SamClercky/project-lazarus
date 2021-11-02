@@ -7,6 +7,41 @@ include "utils.inc"
 
 CODESEG
 
+PROC Utils_set_active
+    ARG @@active_array:dword, @@index:dword, @@value:dword
+    USES eax, ecx, edx, esi
+
+    mov esi, [@@active_array]
+    mov eax, [@@index]
+    xor edx, edx
+
+    mov ecx, 8
+    div ecx
+
+    add esi, eax
+    mov ecx, edx
+    mov edx, 1
+    shl edx, cl
+
+    mov eax, [@@value]
+    test eax, eax
+    jnz @@one
+
+    mov eax, [esi]
+    not edx
+    and eax, edx
+    jmp @@write
+
+@@one:
+    mov eax, [esi]
+    or eax, edx
+
+@@write:
+    mov [esi], eax
+
+    ret
+ENDP
+
 ;; returns eax=NULL if no found otherwise value in array
 PROC Utils_is_active
     ARG @@active_array:dword, @@index:dword
@@ -22,7 +57,8 @@ PROC Utils_is_active
     
     mov ecx, edx
     add esi, eax
-    shr eax, cl
+    mov al, [esi]
+    shr al, cl
 
     and eax, 1
 
@@ -43,7 +79,7 @@ PROC Utils_get_next_active_index
 
     call Utils_is_active, [@@active_array], ecx
     test eax, eax
-    jz @@end_loop
+    jnz @@end_loop
 
     mov eax, ecx
     pop ecx ; cleaning
