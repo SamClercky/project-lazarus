@@ -60,6 +60,10 @@ start:
     ;; init players and crates
     call Player_init
     call Crate_init
+
+    ;; fill buffer with non random data -> less glitch at the start
+    call Drawer_bg
+    call Drawer_update
     
     call enable_video
 
