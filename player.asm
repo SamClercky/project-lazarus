@@ -8,6 +8,9 @@ include "player.inc"
 include "drawer.inc"
 include "physics.inc"
 
+PLAYER_WIDTH equ 10
+PLAYER_HEIGHT equ 10
+
 CODESEG
 
 ;; inits player and adds it to the physics engine
@@ -29,12 +32,38 @@ ENDP
 
 PROC Player_handle_input
     ARG @@input_ascii:dword
+    USES eax, ebx, edx, esi
 
+    mov esi, OFFSET player
+    mov eax, [@@input_ascii]
+
+    cmp eax, 4B00h
+    je @@left
+
+    cmp eax, 4D00h
+    je @@right
+
+    jmp @@return
+    
+@@left:
+    call Physics_check_colliding, esi, DIR_LEFT
+    test eax, eax
+    jnz @@return
+    sub [(Drawable PTR esi).x], 10
+    jmp @@return
+
+@@right:
+    call Physics_check_colliding, esi, DIR_RIGHT
+    test eax, eax
+    jnz @@return
+    add [(Drawable PTR esi).x], 10
+
+@@return:
     ret
 ENDP
 
 DATASEG
-player Drawable <50,20,20,20,offset playerData>
-playerData db 400 DUP(0Ch)
+player Drawable <50,20,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
+playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(0Ch)
 
 end

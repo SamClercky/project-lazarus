@@ -53,6 +53,7 @@ PROC Game_update
 ENDP
 
 ;; eax = 0 -> everything ok, eax = 1 -> end game
+;; scan codes: https://www.fountainware.com/EXPL/bios_key_codes.htm
 PROC Game_handle_input
     mov ah, 01h
     int 16h
@@ -67,7 +68,7 @@ PROC Game_handle_input
     je @@stop_game
 
     ;; pass input to other functions
-    and eax, 0FFh
+    and eax, 0FFFFh
     call Player_handle_input, eax
 
     jmp @@no_key_press ; keypress has been handled
