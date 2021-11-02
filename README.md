@@ -3,6 +3,10 @@ Lazarus reimplemented in tasm
 
 ## Playing the game
 
+### Ending the game
+
+Press `ESC` to end the game.
+
 ## Project structure
 
 ### Graphics

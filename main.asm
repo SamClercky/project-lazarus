@@ -13,9 +13,8 @@ P386
 MODEL FLAT, C
 ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
+include "game.inc"
 include "drawer.inc"
-include "player.inc"
-include "crate.inc"
 
 ; -------------------------------------------------------------------
 ; CODE
@@ -57,28 +56,16 @@ start:
     push ds
     pop es
 
-    ;; init players and crates
-    call Player_init
-    call Crate_init
-
-    ;; fill buffer with non random data -> less glitch at the start
-    call Drawer_bg
-    call Drawer_update
+    call Game_init
     
     call enable_video
 
 @@game_loop:
     call waitForVBI
-    call Drawer_bg
-    call Crate_draw
-    call Player_draw
 
-    ;; update screen
-    call Drawer_update
+    call Game_update
     
-    ;; check if ending
-    mov ah, 01h
-    int 16h
+    test eax, eax
     jz @@game_loop ; continue game
 
 	; Wait for keystroke and read character.

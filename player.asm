@@ -27,6 +27,12 @@ PROC Player_draw
     ret
 ENDP
 
+PROC Player_handle_input
+    ARG @@input_ascii:dword
+
+    ret
+ENDP
+
 DATASEG
 player Drawable <50,20,20,20,offset playerData>
 playerData db 400 DUP(0Ch)
