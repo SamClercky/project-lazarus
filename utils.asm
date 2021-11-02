@@ -114,4 +114,5 @@ PROC Utils_get_if_active
     ; pass through
 @@return:
     ret
+ENDP
 end
