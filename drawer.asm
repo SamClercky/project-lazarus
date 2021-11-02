@@ -47,52 +47,59 @@ ENDP
 PROC Drawer_draw
     ARG @@drawable_ptr:dword
     USES eax, ebx, ecx, edx, edi, esi
-    
-    mov ebx, [@@drawable_ptr] ; deref in ebx
 
+    mov ebx, [@@drawable_ptr]
+    xor ecx, ecx
     mov cx, [(Drawable PTR ebx).height]
 @@loop_height:
-    ;; check if still on screen
-    mov ax, [(Drawable PTR ebx).y]
-    add ax, [(Drawable PTR ebx).height]
-    sub ax, cx
-    cmp ax, WINDOW_HEIGHT
-    jge @@return ; if no longer on screen, end drawing
-    
-    ;; calc dest in relative data (height)
-    mov edx, WINDOW_WIDTH
-    mul edx ; mul line number (eax) with width
-    mov edi, eax ; result of mul in edx:eax
+    push ecx
+    dec ecx
 
-    ;; calc source in relative data (height)
-    mov ax, [(Drawable PTR ebx).height]
-    sub ax, cx
+    ;; absolute
+    mov edi, OFFSET back_buffer
+
+    xor eax, eax ; clean eax
+    mov ax, [(Drawable PTR ebx).y]
+    add ax, cx
+
+    ;; check if in range
+    cmp eax, WINDOW_HEIGHT
+    jge @@end_height_loop ; row out of scope
+
+    mov edx, WINDOW_WIDTH
+    mul edx
+
+    add edi, eax
+    xor eax, eax
+    mov ax, [(Drawable PTR ebx).x]
+    add edi, eax
+    
+    ;; relative
+    mov esi, [(Drawable PTR ebx).data_ptr]
+    xor eax, eax
+    mov ax, cx
+
+    xor edx, edx
     mov dx, [(Drawable PTR ebx).width]
     mul edx
-    mov esi, eax
+    add esi, eax
 
-    push cx ; remember for next time
-    
+    ;; preferable width
+    xor ecx, ecx
     mov cx, [(Drawable PTR ebx).width]
-    mov ax, WINDOW_WIDTH
-    sub ax, [(Drawable PTR ebx).x]
-    call Min, ecx, eax
-    mov ecx, eax ; take the smallest and put it in ecx
-    
-    ;; calc source based on width
-    mov dx, [(Drawable PTR ebx).x]
-    add di, dx
-    ;add si, dx
+    ;; calc available width
+    xor edx, edx
+    mov dx, WINDOW_WIDTH
+    sub dx, [(Drawable PTR ebx).x]
+    ;; actual width
+    call Min, ecx, edx
+    mov ecx, eax
+    ;; write
+    REP movsb
 
-    ;; make absolute
-    add esi, [(Drawable PTR ebx).data_ptr]
-    add edi, offset back_buffer
-
-    ;; draw 1 line
-    rep movsb
-    
-    pop cx ; restore ecx (height)
-    loop @@loop_height ; next line
+@@end_height_loop:
+    pop ecx
+    loop @@loop_height
 
 @@return:
     ret

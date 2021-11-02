@@ -28,7 +28,7 @@ PROC Player_draw
 ENDP
 
 DATASEG
-player Drawable <50,0,10,20,offset playerData>
-playerData db 100 DUP(0Ch)
+player Drawable <50,20,20,20,offset playerData>
+playerData db 400 DUP(0Ch)
 
 end
