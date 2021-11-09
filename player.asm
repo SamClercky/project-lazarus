@@ -11,6 +11,8 @@ include "physics.inc"
 PLAYER_WIDTH equ 10
 PLAYER_HEIGHT equ 10
 
+PLAYER_STEP equ 10
+
 CODESEG
 
 ;; inits player and adds it to the physics engine
@@ -30,6 +32,51 @@ PROC Player_draw
     ret
 ENDP
 
+;; Player moves with collision detection
+;; If there is no collision left/right -> player moves
+;; If there is collision left/right -> check up -> player jumps
+PROC Player_collision_movement
+    ARG @@direction:dword
+    USES eax, ebx, esi, edi
+
+    mov esi, OFFSET player
+    mov eax, [@@direction]
+    ;; test left/right
+    call Physics_check_colliding, esi, eax
+    test eax, eax
+    
+    mov edi, eax ;; save eax
+
+    jz @@move_left_right
+
+    ;; test one up
+    sub [(Drawable PTR esi).y], PLAYER_STEP ;; move up
+
+    call Physics_check_colliding, esi, [@@direction]
+    test eax, eax
+    jz @@move_left_right
+
+    ;; undo jump
+    add [(Drawable PTR esi).y], PLAYER_STEP ;; move down
+    jmp @@return
+
+@@move_left_right:
+    cmp [@@direction], DIR_LEFT
+    je @@left
+    jmp @@right
+
+@@left:
+    sub [(Drawable PTR esi).x], PLAYER_STEP
+    jmp @@return
+
+@@right:
+    add [(Drawable PTR esi).x], PLAYER_STEP
+    jmp @@return
+
+@@return:
+    ret
+ENDP
+
 PROC Player_handle_input
     ARG @@input_ascii:dword
     USES eax, ebx, edx, esi
@@ -46,17 +93,11 @@ PROC Player_handle_input
     jmp @@return
     
 @@left:
-    call Physics_check_colliding, esi, DIR_LEFT
-    test eax, eax
-    jnz @@return
-    sub [(Drawable PTR esi).x], 10
+    call Player_collision_movement, DIR_LEFT
     jmp @@return
 
 @@right:
-    call Physics_check_colliding, esi, DIR_RIGHT
-    test eax, eax
-    jnz @@return
-    add [(Drawable PTR esi).x], 10
+    call Player_collision_movement, DIR_RIGHT
 
 @@return:
     ret
@@ -64,6 +105,7 @@ ENDP
 
 DATASEG
 player Drawable <50,20,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
+;player Drawable <10,180,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
 playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(0Ch)
 
 end
