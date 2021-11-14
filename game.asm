@@ -40,8 +40,10 @@ PROC Game_update
     call Drawer_draw, OFFSET wallB
 
     ;;; entities
-    call Crate_draw
-    call Player_draw
+    call Player_update
+    call Crate_update
+    ;;; make new crates --> in Player_update
+
 
     ;; update screen
     call Drawer_update

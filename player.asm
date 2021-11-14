@@ -5,6 +5,7 @@ ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
 include "player.inc"
 
+include "crate.inc"
 include "drawer.inc"
 include "physics.inc"
 
@@ -22,12 +23,15 @@ PROC Player_init
     ret
 ENDP
 
-PROC Player_draw
+PROC Player_update
     USES eax, esi
+
     mov esi, offset player
     call Drawer_draw, esi
 
     call Physics_apply_gravity_with_collision, esi, 1
+    
+    call Crate_spawn_new_crate, OFFSET player  ;; crates need to spawn on player x-coordinate (depending on time/amount of updates)
 
     ret
 ENDP

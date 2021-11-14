@@ -1,4 +1,4 @@
-GLOBAL Player_draw:PROC,\
+GLOBAL Player_update:PROC,\
     Player_init:PROC,\
     Player_handle_input:PROC
 

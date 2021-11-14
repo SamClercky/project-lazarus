@@ -289,7 +289,7 @@ ENDP
 ;; checks if point is in object
 PROC Physics_point_in_obj
     ARG @@obj_ptr:dword, @@x:dword, @@y:dword
-    USES esi
+    USES esi                                            ;eax?
 
     mov esi, [@@obj_ptr]
 
