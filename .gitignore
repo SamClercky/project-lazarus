@@ -1,3 +1,4 @@
 *.EXE
 *.OBJ
 desktop.ini
+.ipynb_checkpoints

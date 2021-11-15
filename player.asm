@@ -9,10 +9,10 @@ include "crate.inc"
 include "drawer.inc"
 include "physics.inc"
 
-PLAYER_WIDTH equ 10
-PLAYER_HEIGHT equ 10
+PLAYER_WIDTH equ 20
+PLAYER_HEIGHT equ 20
 
-PLAYER_STEP equ 10
+PLAYER_STEP equ 20
 
 CODESEG
 
