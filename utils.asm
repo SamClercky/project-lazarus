@@ -115,4 +115,39 @@ PROC Utils_get_if_active
 @@return:
     ret
 ENDP
+
+;; Load file into memory, -1 in eax if failed
+PROC Utils_read_file
+    ARG @@file_name:dword, @@dest_buffer:dword, @@number_of_bytes:dword
+    USES ebx, ecx, edx
+
+    ;; opening file in read only mode
+    mov ax, 3D00h
+    mov edx, [@@file_name]
+    int 21h
+
+    jc @@return ; error occured, could not open file, err code in eax
+
+    ;; read data
+    mov bx, ax ; file handle
+    mov ax, 3F00h
+    mov ecx, [@@number_of_bytes]
+    mov edx, [@@dest_buffer]
+    int 21h
+
+    jc @@return ; error occured, could not read file, err code in eax
+
+    ;; close the file
+    mov ax, 3E00h
+    int 21h
+
+    jc @@return ; error occured, could not close file, err code in eax
+
+    ;; everything went OK -> eax = 0
+    xor eax, eax
+
+@@return:
+    ret
+ENDP
+
 end

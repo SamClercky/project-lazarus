@@ -19,7 +19,7 @@ PROC Game_init
 
     ;; init players and crates
     call Player_init
-    call Crate_init
+    ;call Crate_init
 
     ;; init physics
     call Physics_add_static, OFFSET wallL
@@ -41,7 +41,7 @@ PROC Game_update
 
     ;;; entities
     call Player_update
-    call Crate_update
+    ;call Crate_update
     ;;; make new crates --> in Player_update
 
 

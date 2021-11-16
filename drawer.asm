@@ -4,6 +4,7 @@ MODEL FLAT, C
 ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
 include "drawer.inc"
+include "utils.inc"
 
 WINDOW_BUFFER equ 0A0000h
 WINDOW_WIDTH equ 320
@@ -15,6 +16,8 @@ PROC enable_video
 
     mov ax, 0013h ; video mode -> 13h
     int 10h ; send to BIOS
+
+    call Drawer_load_colorpalette
 
     ret
 ENDP
@@ -40,6 +43,39 @@ PROC Drawer_bg
     mov al, 0Fh ; color
     rep stosb
     
+    ret
+ENDP
+
+PROC Drawer_load_colorpalette
+    USES eax, ebx, ecx, edx, esi, edi
+
+    mov esi, OFFSET color_palette
+
+    call Utils_read_file, OFFSET color_filename, esi, 256*4
+
+    ;; start writing to graphics card
+    mov dx, 03C8h
+    mov al, 0h
+    out dx, al
+    mov dx, 03C9h
+
+    mov ecx, 256
+@@loop:
+    mov ebx, 256
+    sub ebx, ecx
+
+    ;; red
+    mov al, [esi + 4*ebx]
+    out dx, al
+    ;; green
+    mov al, [esi + 4*ebx + 1]
+    out dx, al
+    ;; blue
+    mov al, [esi + 4*ebx + 2]
+    out dx, al
+
+    loop @@loop
+
     ret
 ENDP
 
@@ -135,8 +171,12 @@ PROC Drawer_update
     ret
 ENDP
 
+DATASEG
+color_filename db "sprites\palette.b", 0
+
 UDATASEG
 ;; Writing to back buffer for less flicker
 back_buffer db WINDOW_WIDTH*WINDOW_HEIGHT DUP(?)
+color_palette db 256*4 DUP(?)
 
 end
