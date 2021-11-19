@@ -87,11 +87,11 @@ PROC Game_handle_input
 ENDP
 
 DATASEG
-wallL Drawable <0,0,10,200,OFFSET wallLSprite>
+wallL Drawable <0,0,20,200,OFFSET wallLSprite>
 wallLSprite db 2000 DUP(28h)
 wallB Drawable <10,190,300,10,OFFSET wallBSprite>
 wallBSprite db 3000 DUP(28h)
-wallR Drawable <310,0,10,200,OFFSET wallRSprite>
+wallR Drawable <300,0,20,200,OFFSET wallRSprite>
 wallRSprite db 2000 DUP(28h)
 
 end

@@ -11,6 +11,8 @@ include "physics.inc"
 
 PLAYER_WIDTH equ 20
 PLAYER_HEIGHT equ 20
+PLAYER_X_START equ 20
+PLAYER_Y_START equ 120
 
 PLAYER_STEP equ 20
 
@@ -108,8 +110,7 @@ PROC Player_handle_input
 ENDP
 
 DATASEG
-player Drawable <50,20,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
-;player Drawable <10,180,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
+player Drawable <PLAYER_X_START,PLAYER_Y_START,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
 playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(0Ch)
 
 end

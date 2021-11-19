@@ -8,24 +8,23 @@ include "drawer.inc"
 include "physics.inc"
 include "utils.inc"
 
-CRATE_WIDTH equ 10
-CRATE_HEIGHT equ 10
+CRATE_WIDTH equ 20
+CRATE_HEIGHT equ 20
+CRATE_Y_START equ 0
 
 
 CODESEG
 
 PROC Crate_init
 
-   ; call Physics_add_dynamic, OFFSET crate3
 
     ret
 ENDP
 
 PROC Crate_spawn_new_crate
     ARG @@player_ptr:dword
-    USES eax, esi, edi
+    USES eax, esi, edi, ebx
 
-    xor eax, eax
     ;; check timer --> create new one or not
     mov eax, [spawn_crate_timer]
     cmp eax, 200     ;; 200 indicator for time, after how many Game_updates
@@ -38,18 +37,22 @@ PROC Crate_spawn_new_crate
     je @@return ;; check if not full and fail silently
     ;; set active
     call Utils_set_active, OFFSET crates_active, eax, 1
-    ;; get new active crate
-    call Utils_get_if_active, OFFSET crates_active, OFFSET crates_objects, eax
 
- ;   mov edi, OFFSET crates_objects
- ;   mov edi, [edi + 4*eax]
-   
-    ;; making crate spawn on same x-coordinate as player
-    mov edi, eax ; destination pointer with active crate in eax
+    ;; get new active crate offset 
+    mov ebx, 12 ;drawable is 12 bytes
+    mov edi, OFFSET crates_objects
+    mul ebx ;12*eax(=index)
+    add edi, eax
+    
+    ;; making new crate spawn on same x-coordinate as player
     xor eax, eax
     mov esi, [@@player_ptr]
     mov ax, [(Drawable PTR esi).x]
     mov [(Drawable PTR edi).x], ax
+    mov [(Drawable PTR edi).y], CRATE_Y_START
+    mov [(Drawable PTR edi).width], CRATE_WIDTH
+    mov [(Drawable PTR edi).height], CRATE_HEIGHT
+    mov [(Drawable PTR edi).data_ptr], OFFSET crateSprite
     ;add new crate to physics
     call Physics_add_dynamic, edi
 
@@ -69,7 +72,7 @@ PROC Crate_spawn_new_crate
 ENDP
 
 PROC Crate_update
-    USES esi, ecx, eax
+   USES esi, ecx, eax
 
 ;; call Crate_spawn_new_crate --> called from Player_update
 
@@ -79,12 +82,17 @@ PROC Crate_update
     push ecx
     dec ecx ; ecx in [0-len)
 
-    call Utils_get_if_active, OFFSET crates_active, OFFSET crates_objects, ecx
+    call Utils_is_active, OFFSET crates_active, ecx
     test eax, eax ; test if active
     jz @@end_crates ; if NULL -> not active
     
     ;; update current crate
-    mov esi, eax ; PTR currently in eax
+    mov esi, OFFSET crates_objects
+    mov ebx, 12 ;drawable is 12 bytes
+    mov eax, ecx
+    mul ebx
+    add esi, eax
+
     call Drawer_draw, esi
     call Physics_apply_gravity_with_collision, esi, 1
 
@@ -92,19 +100,17 @@ PROC Crate_update
     pop ecx
     loop @@loop_crates
    
-
     ret
 ENDP
 
 DATASEG
 spawn_crate_timer dd 0
 ;crate1 Drawable <120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>
-;crate2 Drawable <120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>
 crateSprite db 3000 DUP(3Fh)
-crates_active  db CRATES_MAX_COUNT/8  DUP(0)
+crates_active  db CRATES_MAX_COUNT/8 DUP(0)
 
 UDATASEG
 
-crates_objects  Drawable CRATES_MAX_COUNT  DUP(<120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>)
+crates_objects Drawable CRATES_MAX_COUNT DUP(?)
 
 end

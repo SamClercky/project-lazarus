@@ -33,3 +33,10 @@ There are 3 buffers reserved for the physics objects.
 A pointer to all on screen entities participating in the physics cycle are in
 their own array. Each array has a map that contains a binary value whether a
 element is active.
+
+
+### Crates
+
+There is 1 buffer reserved for the crate objects which stores the structs representing the crates.
+
+crates spawn at the top of the screen. They fall till they hit another object in the game and if the player gets hit/squished it's GAME OVER.
