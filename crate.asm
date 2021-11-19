@@ -16,7 +16,9 @@ CRATE_Y_START equ 0
 CODESEG
 
 PROC Crate_init
+    ;; load sprites
 
+    call Utils_read_file, OFFSET crate_filename, OFFSET crateSprite, CRATE_WIDTH*CRATE_HEIGHT
 
     ret
 ENDP
@@ -106,11 +108,13 @@ ENDP
 DATASEG
 spawn_crate_timer dd 0
 ;crate1 Drawable <120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>
-crateSprite db 3000 DUP(3Fh)
 crates_active  db CRATES_MAX_COUNT/8 DUP(0)
+
+crate_filename db "sprites\rock.b", 0
 
 UDATASEG
 
 crates_objects Drawable CRATES_MAX_COUNT DUP(?)
+crateSprite db 400 DUP(?)
 
 end
