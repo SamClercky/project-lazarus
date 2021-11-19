@@ -88,10 +88,10 @@ ENDP
 
 DATASEG
 wallL Drawable <0,0,20,200,OFFSET wallLSprite>
-wallLSprite db 2000 DUP(28h)
-wallB Drawable <10,190,300,10,OFFSET wallBSprite>
-wallBSprite db 3000 DUP(28h)
+wallLSprite db 4000 DUP(28h)
+wallB Drawable <10,180,300,20,OFFSET wallBSprite>
+wallBSprite db 6000 DUP(28h)
 wallR Drawable <300,0,20,200,OFFSET wallRSprite>
-wallRSprite db 2000 DUP(28h)
+wallRSprite db 4000 DUP(28h)
 
 end
