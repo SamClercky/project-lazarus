@@ -39,9 +39,9 @@ PROC Crate_spawn_new_crate
     call Utils_set_active, OFFSET crates_active, eax, 1
 
     ;; get new active crate offset 
-    mov ebx, 12 ;drawable is 12 bytes
+    mov ebx, DRAWABLE_BYTES ;drawable is 12 bytes
+    mul ebx ;DRAWABLE_BYTES*eax(=index)
     mov edi, OFFSET crates_objects
-    mul ebx ;12*eax(=index)
     add edi, eax
     
     ;; making new crate spawn on same x-coordinate as player
@@ -72,7 +72,7 @@ PROC Crate_spawn_new_crate
 ENDP
 
 PROC Crate_update
-   USES esi, ecx, eax
+   USES esi, ecx, eax, ebx
 
 ;; call Crate_spawn_new_crate --> called from Player_update
 
@@ -88,7 +88,7 @@ PROC Crate_update
     
     ;; update current crate
     mov esi, OFFSET crates_objects
-    mov ebx, 12 ;drawable is 12 bytes
+    mov ebx, DRAWABLE_BYTES ;drawable is 12 bytes
     mov eax, ecx
     mul ebx
     add esi, eax

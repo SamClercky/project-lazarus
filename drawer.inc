@@ -11,4 +11,7 @@ STRUC Drawable
     height   dw 0
     data_ptr dd 0
 ENDS
+
+DRAWABLE_BYTES equ 12
+
 ; vim: set ft=asm :

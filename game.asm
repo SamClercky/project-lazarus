@@ -50,7 +50,12 @@ PROC Game_update
     
     ;; handle game input and return eax to see if the game loop needs to end
     call Game_handle_input
+    cmp eax, 1 ; if Esc is pressed the program ends
+    je @@return
 
+    call Player_check_dead
+
+@@return:
     ret
 ENDP
 

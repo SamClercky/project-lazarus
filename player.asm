@@ -113,6 +113,19 @@ PROC Player_handle_input
     ret
 ENDP
 
+PROC Player_check_dead
+    
+    call Physics_check_colliding, OFFSET player, DIR_UP
+    test eax, eax
+    jz @@return
+    
+    ;; game need to end, because player got squished
+    mov eax, 1 ;game loop stops when eax is 1 in main.asm after Game_update
+
+@@return:
+    ret
+ENDP
+
 DATASEG
 
 player Drawable <PLAYER_X_START,PLAYER_Y_START,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
