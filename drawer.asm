@@ -65,13 +65,13 @@ PROC Drawer_load_colorpalette
     sub ebx, ecx
 
     ;; red
-    mov al, [esi + 4*ebx]
+    mov al, [esi + 4*ebx + 2]
     out dx, al
     ;; green
     mov al, [esi + 4*ebx + 1]
     out dx, al
     ;; blue
-    mov al, [esi + 4*ebx + 2]
+    mov al, [esi + 4*ebx + 3]
     out dx, al
 
     loop @@loop
