@@ -71,7 +71,7 @@ PROC Drawer_load_colorpalette
     mov al, [esi + 4*ebx + 1]
     out dx, al
     ;; blue
-    mov al, [esi + 4*ebx + 3]
+    mov al, [esi + 4*ebx]
     out dx, al
 
     loop @@loop
@@ -172,7 +172,7 @@ PROC Drawer_update
 ENDP
 
 DATASEG
-color_filename db "sprites\palette.b", 0
+color_filename db "sprites\palet.b", 0
 
 UDATASEG
 ;; Writing to back buffer for less flicker

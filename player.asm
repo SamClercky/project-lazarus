@@ -115,7 +115,7 @@ DATASEG
 player Drawable <50,20,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
 ;player Drawable <10,180,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
 
-player_filename db "sprites\btn.b", 0
+player_filename db "sprites\player.b", 0
 
 UDATASEG
 playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(?)
