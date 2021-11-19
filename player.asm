@@ -8,6 +8,7 @@ include "player.inc"
 include "crate.inc"
 include "drawer.inc"
 include "physics.inc"
+include "utils.inc"
 
 PLAYER_WIDTH equ 20
 PLAYER_HEIGHT equ 20
@@ -21,6 +22,9 @@ CODESEG
 ;; inits player and adds it to the physics engine
 PROC Player_init
     call Physics_add_dynamic, OFFSET player
+
+    ;; load sprite data
+    call Utils_read_file, OFFSET player_filename, OFFSET playerData, PLAYER_WIDTH*PLAYER_HEIGHT
 
     ret
 ENDP
@@ -110,7 +114,11 @@ PROC Player_handle_input
 ENDP
 
 DATASEG
+
 player Drawable <PLAYER_X_START,PLAYER_Y_START,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
-playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(0Ch)
+player_filename db "sprites\player.b", 0
+
+UDATASEG
+playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(?)
 
 end
