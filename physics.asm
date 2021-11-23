@@ -11,39 +11,37 @@ CODESEG
 
 PROC Physics_add_static
     ARG @@drawer_ptr:dword
-    USES eax, esi, edi
+    call Utils_add_to_container, [@@drawer_ptr], OFFSET static_active, OFFSET static_objects, STATIC_OBJECT_MAX_COUNT
+    ret
+ENDP
 
-    call Utils_get_next_active_index, OFFSET static_active, STATIC_OBJECT_MAX_COUNT
-    cmp eax, -1
-    je @@return ;; check if not full and fail silently
-
-    ;; set active
-    call Utils_set_active, OFFSET static_active, eax, 1
-    ;; not full
-    mov edi, OFFSET static_objects
-    mov esi, [@@drawer_ptr]
-    mov [edi + 4*eax], esi
-
-@@return:
+PROC Physics_del_static
+    ARG @@index:dword
+    call Utils_remove_from_container, OFFSET static_active, [@@index], STATIC_OBJECT_MAX_COUNT
     ret
 ENDP
 
 PROC Physics_add_dynamic
     ARG @@drawer_ptr:dword
-    USES eax, esi, edi
+    call Utils_add_to_container, [@@drawer_ptr], OFFSET dynamic_active, OFFSET dynamic_objects, DYNAMIC_OBJECT_MAX_COUNT
+    ret
+ENDP
 
-    call Utils_get_next_active_index, OFFSET dynamic_active, DYNAMIC_OBJECT_MAX_COUNT
-    cmp eax, -1
-    je @@return ;; check if not full and fail silently
+PROC Physics_del_dynamic
+    ARG @@index:dword
+    call Utils_remove_from_container, OFFSET dynamic_active, [@@index], DYNAMIC_OBJECT_MAX_COUNT
+    ret
+ENDP
 
-    ;; set active
-    call Utils_set_active, OFFSET dynamic_active, eax, 1
-    ;; not full
-    mov edi, OFFSET dynamic_objects
-    mov esi, [@@drawer_ptr]
-    mov [edi + 4*eax], esi
+PROC Physics_add_moving
+    ARG @@drawer_ptr:dword
+    call Utils_add_to_container, [@@drawer_ptr], OFFSET moving_active, OFFSET moving_objects, MOVING_OBJECT_MAX_COUNT
+    ret
+ENDP
 
-@@return:
+PROC Physics_del_moving
+    ARG @@index:dword
+    call Utils_remove_from_container, OFFSET moving_active, [@@index], MOVING_OBJECT_MAX_COUNT
     ret
 ENDP
 

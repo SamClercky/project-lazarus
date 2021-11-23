@@ -3,8 +3,12 @@ GLOBAL Physics_apply_gravity:PROC,\
     Physics_check_colliding:PROC,\
     Physics_is_colliding:PROC,\
     Physics_point_in_obj:PROC,\
+    Physics_add_static:PROC,\
+    Physics_del_static:PROC,\
     Physics_add_dynamic:PROC,\
-    Physics_add_static:PROC
+    Physics_del_dynamic:PROC,\
+    Physics_add_moving:PROC,\
+    Physics_del_moving:PROC
 
 ;; needs to be multiple of 8, because the maps are in groups of 1 byte (8 bits)
 MOVING_OBJECT_MAX_COUNT  equ 8

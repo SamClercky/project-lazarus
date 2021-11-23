@@ -116,6 +116,40 @@ PROC Utils_get_if_active
     ret
 ENDP
 
+PROC Utils_add_to_container
+    ARG @@drawer_ptr:dword, @@active_ptr:dword, @@container_ptr:dword, @@max_count:dword
+    USES eax, esi, edi
+
+    call Utils_get_next_active_index, [@@active_ptr], [@@max_count]
+    cmp eax, -1
+    je @@return ;; check if not full and fail silently
+
+    ;; set active
+    call Utils_set_active, [@@active_ptr], eax, 1
+    ;; not full
+    mov edi, [@@container_ptr]
+    mov esi, [@@drawer_ptr]
+    mov [edi + 4*eax], esi
+
+@@return:
+    ret
+ENDP
+
+PROC Utils_remove_from_container
+    ARG @@active_ptr:dword, @@index:dword, @@max_count:dword
+    USES eax
+
+    mov eax, [@@index]
+    cmp eax, [@@max_count]
+    jge @@return ;; index out of range, early return
+
+    ;; deactivate
+    call Utils_set_active, [@@active_ptr], eax, 0
+
+@@return:
+    ret
+ENDP
+
 ;; Load file into memory, -1 in eax if failed
 PROC Utils_read_file
     ARG @@file_name:dword, @@dest_buffer:dword, @@number_of_bytes:dword
