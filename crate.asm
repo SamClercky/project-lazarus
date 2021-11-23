@@ -23,16 +23,11 @@ PROC Crate_init
     ret
 ENDP
 
-PROC Crate_spawn_new_crate
-    ARG @@player_ptr:dword
-    USES eax, esi, edi, ebx
-
-    ;; check timer --> create new one or not
-    mov eax, [spawn_crate_timer]
-    cmp eax, 200     ;; 200 indicator for time, after how many Game_updates
-    jl @@update_timer
-
-    ;; make new crate
+PROC Crate_constructor
+    ARG @@x:dword, @@y:dword, @@width:dword, @@height:dword, @@sprite_ptr:dword
+    USES eax, ebx, edi
+    
+     ;; make new crate
     xor eax, eax
     call Utils_get_next_active_index, OFFSET crates_active, CRATES_MAX_COUNT
     cmp eax, -1
@@ -40,23 +35,45 @@ PROC Crate_spawn_new_crate
     ;; set active
     call Utils_set_active, OFFSET crates_active, eax, 1
 
-    ;; get new active crate offset 
+    ;; get new (active) crate offset 
     mov ebx, DRAWABLE_BYTES ;drawable is 12 bytes
-    mul ebx ;DRAWABLE_BYTES*eax(=index)
+    mul ebx ; DRAWABLE_BYTES*eax(=index)
     mov edi, OFFSET crates_objects
     add edi, eax
     
-    ;; making new crate spawn on same x-coordinate as player
+    ;; spawning new crate
+    xor ebx, ebx
+    mov ebx, [@@x]
+    mov [(Drawable PTR edi).x], bx
+    mov ebx, [@@y]
+    mov [(Drawable PTR edi).y], bx
+    mov ebx, [@@width]
+    mov [(Drawable PTR edi).width], bx
+    mov ebx, [@@height]
+    mov [(Drawable PTR edi).height], bx
+    mov ebx, [@@sprite_ptr]
+    mov [(Drawable PTR edi).data_ptr], ebx
+    ;; add new crate to physics
+    call Physics_add_dynamic, edi
+
+@@return:
+    ret
+ENDP
+
+PROC Crate_spawn_new_crate
+    ARG @@player_ptr:dword
+    USES eax, esi
+
+    ;; check timer --> create new one or not
+    mov eax, [spawn_crate_timer]
+    cmp eax, 120     ;; indicator for time, after how many Game_updates
+    jl @@update_timer
+
+    ;; make new crate
     xor eax, eax
     mov esi, [@@player_ptr]
     mov ax, [(Drawable PTR esi).x]
-    mov [(Drawable PTR edi).x], ax
-    mov [(Drawable PTR edi).y], CRATE_Y_START
-    mov [(Drawable PTR edi).width], CRATE_WIDTH
-    mov [(Drawable PTR edi).height], CRATE_HEIGHT
-    mov [(Drawable PTR edi).data_ptr], OFFSET crateSprite
-    ;add new crate to physics
-    call Physics_add_dynamic, edi
+    call Crate_constructor, eax, CRATE_Y_START, CRATE_WIDTH, CRATE_HEIGHT, OFFSET crateSprite
 
     ;;reset timer
     mov [spawn_crate_timer], 0
