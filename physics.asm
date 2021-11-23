@@ -224,8 +224,9 @@ PROC Physics_is_colliding
 
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
-    inc ebx ; getting up, but may lead to problems in the future
     dec eax
+    add bx, [(Drawable PTR esi).height]
+    sub ebx, 5 ; getting up, but may lead to problems in the future
     call Physics_point_in_obj, edi, eax, ebx
     test eax, eax
     jz @@no_collision
@@ -255,6 +256,8 @@ PROC Physics_is_colliding
     mov bx, [(Drawable PTR esi).y]
     add ax, [(Drawable PTR esi).width]
     inc eax
+    add bx, [(Drawable PTR esi).height]
+    sub ebx, 5
     inc ebx
     call Physics_point_in_obj, edi, eax, ebx
     test eax, eax
