@@ -131,7 +131,16 @@ PROC Drawer_draw
     call Min, ecx, edx
     mov ecx, eax
     ;; write
-    REP movsb
+    ;rep movsb
+@@width_write:
+    mov al, [esi]
+    test al, al
+    jz @@end_width_write ; conditionally move byte if not transparant
+    mov [edi], al
+@@end_width_write:
+    inc edi ; setup for next round
+    inc esi
+    loop @@width_write
 
 @@end_height_loop:
     pop ecx
