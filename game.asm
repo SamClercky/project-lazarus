@@ -12,14 +12,19 @@ include "utils.inc"
 
 CODESEG
 
-PROC Game_init
-    ;; fill buffer with non random data -> less glitch at the start
-    call Drawer_bg
-    call Drawer_update
+WALL_SIZE equ 20
 
+PROC Game_init
     ;; init players and crates
     call Player_init
     call Crate_init
+
+    ;; load walls
+    call Utils_read_file, OFFSET wallFileName, OFFSET wallSprite, 400
+
+    ;; fill buffer with non random data -> less glitch at the start
+    call Drawer_bg
+    call Drawer_update
 
     ;; init physics
     call Physics_add_static, OFFSET wallL
@@ -35,11 +40,14 @@ PROC Game_update
     call Drawer_bg
 
     ;;; walls
-    call Drawer_draw, OFFSET wallL
-    call Drawer_draw, OFFSET wallR
-    call Drawer_draw, OFFSET wallB
+    ;call Drawer_draw, OFFSET wallL
+    ;call Drawer_draw, OFFSET wallR
+    ;call Drawer_draw, OFFSET wallB
+    call Game_draw_walls, 0, 1, 0, 10
+    call Game_draw_walls, 20, 15, 180, 10
+    call Game_draw_walls, 300, 1, 0, 10
 
-    ;;; entities
+    ;; entities
     call Player_update
     call Crate_update
     ;;; make new crates --> in Player_update
@@ -56,6 +64,44 @@ PROC Game_update
     call Player_check_dead
 
 @@return:
+    ret
+ENDP
+
+;; Draws the walls by using wallSprite and placing it
+;; on the place where we want it to be placed
+PROC Game_draw_walls
+    ARG @@start_x:dword, @@times_x:dword, @@start_y:dword, @@times_y:dword
+    USES eax, ecx, esi
+
+    mov esi, OFFSET wallDrawable
+    mov eax, [@@start_y]
+    mov [(Drawable PTR esi).y], ax
+
+    mov ecx, [@@times_y]
+@@loop_y:
+
+    ;; (re)set x coord
+    mov eax, [@@start_x]
+    mov [(Drawable PTR esi).x], ax
+
+    push ecx
+    mov ecx, [@@times_x]
+@@loop_x:
+    
+    ;; draw on screen
+    call Drawer_draw, esi
+
+    ;; update x
+    add [(Drawable PTR esi).x], WALL_SIZE
+
+    loop @@loop_x
+    
+    ;; update y
+    add [(Drawable PTR esi).y], WALL_SIZE
+
+    pop ecx
+    loop @@loop_y
+
     ret
 ENDP
 
@@ -92,11 +138,17 @@ PROC Game_handle_input
 ENDP
 
 DATASEG
-wallL Drawable <0,0,20,200,OFFSET wallLSprite>
-wallLSprite db 4000 DUP(28h)
-wallB Drawable <10,180,300,20,OFFSET wallBSprite>
-wallBSprite db 6000 DUP(28h)
-wallR Drawable <300,0,20,200,OFFSET wallRSprite>
-wallRSprite db 4000 DUP(28h)
+
+;; are there only for the physics
+wallL Drawable <0,0,20,200,?>
+wallB Drawable <10,180,300,20,?>
+wallR Drawable <300,0,20,200,?>
+
+;; sprites for the wall that is loaded on startup
+wallFileName db "sprites\wall.b", 0
+wallDrawable Drawable <0,0,20,20,OFFSET wallSprite>
+
+UDATASEG
+wallSprite db 400 DUP(?)
 
 end
