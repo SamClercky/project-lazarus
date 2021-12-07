@@ -22,9 +22,10 @@ PROC Game_init
 
     ;; load walls
     call Utils_read_file, OFFSET wallFileName, OFFSET wallSprite, 400
+    call Utils_read_file, OFFSET bgFileName, OFFSET bgSprite, 200*320
 
     ;; fill buffer with non random data -> less glitch at the start
-    call Drawer_bg
+    call Drawer_bg, OFFSET bgSprite
     call Drawer_update
 
     ;; init physics
@@ -47,7 +48,7 @@ ENDP
 PROC Game_update
     ;; drawing
     ;;; background
-    call Drawer_bg
+    call Drawer_bg, OFFSET bgSprite
 
     ;;; walls
     ;call Drawer_draw, OFFSET wallL
@@ -290,6 +291,7 @@ DATASEG
   wallR Drawable <300,0,20,200,?>
   
   ;; sprites for the wall that is loaded on startup
+  bgFileName db "sprites\bg.b", 0
   wallFileName db "sprites\wall.b", 0
   wallDrawable Drawable <0,0,20,20,OFFSET wallSprite>
 
@@ -298,6 +300,7 @@ DATASEG
 
 UDATASEG
   wallSprite db 400 DUP(?)
+  bgSprite db 200*320 DUP(?)
   
   ;; mostly from example MYKEYB
   originalKeyboardHandlerS	dw ?			; SELECTOR of original keyboard handler

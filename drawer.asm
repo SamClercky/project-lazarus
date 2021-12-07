@@ -33,15 +33,16 @@ ENDP
 
 ;; Draws background
 PROC Drawer_bg
+    ARG @@drawer_sprite_ptr:dword
     USES eax, ecx, edi
 
     ;; basic temp impl for testing
     ;; draw white pixels to screen (1 at a time)
     
     mov edi, offset back_buffer
-    mov ecx, WINDOW_WIDTH*WINDOW_HEIGHT
-    mov al, 0Fh ; color
-    rep stosb
+    mov ecx, WINDOW_WIDTH*WINDOW_HEIGHT/4
+    mov esi, [@@drawer_sprite_ptr]
+    rep movsd
     
     ret
 ENDP
