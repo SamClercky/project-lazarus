@@ -26,6 +26,7 @@ PROC Player_init
 
     ;; load sprite data
     call Utils_read_file, OFFSET player_filename, OFFSET playerData, PLAYER_WIDTH*PLAYER_HEIGHT
+    call Utils_read_file, OFFSET player_scared_filename, OFFSET playerScaredData, PLAYER_WIDTH*PLAYER_HEIGHT
 
     ret
 ENDP
@@ -34,11 +35,27 @@ PROC Player_update
     USES eax, esi
 
     mov esi, offset player
+    
+    ;; update sprite if player scared
+    movzx eax, [(Drawable PTR esi).x]
+    cmp ax, [player_scared_x]
+    jne @@player_not_scared
+    mov [(Drawable PTR esi).data_ptr], offset playerScaredData
+    jmp @@player_draw
+@@player_not_scared:
+    mov [(Drawable PTR esi).data_ptr], offset playerData
+@@player_draw:
     call Drawer_draw, esi
 
     call Physics_apply_gravity_with_collision, esi, 1
     
     call Crate_spawn_new_crate, OFFSET player  ;; crates need to spawn on player x-coordinate (depending on time/amount of updates)
+    test ax, ax
+    jz @@no_player_scared_update
+
+    mov [player_scared_x], ax ; store x of falling crate
+
+@@no_player_scared_update:
 
     ;; update timer
     mov al, [player_delay_timer]
@@ -145,10 +162,13 @@ DATASEG
 
 player Drawable <PLAYER_X_START,PLAYER_Y_START,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
 player_filename db "sprites\player.b", 0
+player_scared_filename db "sprites\playsq.b", 0
 
 player_delay_timer db 0
+player_scared_x dw 0 ; x of falling crate and used to show scared anim
 
 UDATASEG
 playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(?)
+playerScaredData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(?)
 
 end

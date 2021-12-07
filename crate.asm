@@ -60,19 +60,20 @@ PROC Crate_constructor
     ret
 ENDP
 
+;; create a new falling crate, and when it falls returns in 
+;; eax the x position otherwise 0
 PROC Crate_spawn_new_crate
     ARG @@player_ptr:dword
-    USES eax, esi
+    USES esi
 
     ;; check timer --> create new one or not
-    mov eax, [spawn_crate_timer]
+    movzx eax, [spawn_crate_timer]
     cmp eax, 120     ;; indicator for time, after how many Game_updates
     jl @@update_timer
 
     ;; make new crate
-    xor eax, eax
     mov esi, [@@player_ptr]
-    mov ax, [(Drawable PTR esi).x]
+    movzx eax, [(Drawable PTR esi).x] ;; store x in eax
     call Crate_constructor, eax, CRATE_Y_START, CRATE_WIDTH, CRATE_HEIGHT, OFFSET crateSprite
 
     ;;reset timer
@@ -82,9 +83,11 @@ PROC Crate_spawn_new_crate
 @@update_timer:
     ;;update timer
     xor eax, eax
-    mov eax, [spawn_crate_timer]
-    inc eax
-    mov [spawn_crate_timer], eax
+    mov al, [spawn_crate_timer]
+    inc al
+    mov [spawn_crate_timer], al
+
+    xor eax, eax ; no new crate added
 
 @@return:
     ret
@@ -123,7 +126,7 @@ PROC Crate_update
 ENDP
 
 DATASEG
-spawn_crate_timer dd 0
+spawn_crate_timer db 0
 ;crate1 Drawable <120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>
 crates_active  db CRATES_MAX_COUNT/8 DUP(0)
 
