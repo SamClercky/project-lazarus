@@ -12,13 +12,18 @@ CRATE_WIDTH equ 20
 CRATE_HEIGHT equ 20
 CRATE_Y_START equ 0
 
+CRATE_SPITES_LEN equ 5
 
 CODESEG
 
 PROC Crate_init
     ;; load sprites
 
-    call Utils_read_file, OFFSET crate_filename, OFFSET crateSprite, CRATE_WIDTH*CRATE_HEIGHT
+    call Utils_read_file, OFFSET crate_rock_filename, OFFSET crateRockSprite, CRATE_WIDTH*CRATE_HEIGHT
+    call Utils_read_file, OFFSET crate_stone_filename, OFFSET crateStoneSprite, CRATE_WIDTH*CRATE_HEIGHT
+    call Utils_read_file, OFFSET crate_wood_filename, OFFSET crateWoodSprite, CRATE_WIDTH*CRATE_HEIGHT
+    call Utils_read_file, OFFSET crate_metal_filename, OFFSET crateMetalSprite, CRATE_WIDTH*CRATE_HEIGHT
+    call Utils_read_file, OFFSET crate_card_filename, OFFSET crateCardSprite, CRATE_WIDTH*CRATE_HEIGHT
 
     ret
 ENDP
@@ -64,7 +69,7 @@ ENDP
 ;; eax the x position otherwise 0
 PROC Crate_spawn_new_crate
     ARG @@player_ptr:dword
-    USES esi
+    USES esi, ebx, edi
 
     ;; check timer --> create new one or not
     movzx eax, [spawn_crate_timer]
@@ -73,8 +78,15 @@ PROC Crate_spawn_new_crate
 
     ;; make new crate
     mov esi, [@@player_ptr]
-    movzx eax, [(Drawable PTR esi).x] ;; store x in eax
-    call Crate_constructor, eax, CRATE_Y_START, CRATE_WIDTH, CRATE_HEIGHT, OFFSET crateSprite
+    movzx ebx, [(Drawable PTR esi).x] ;; store x in eax
+    ;; get new crate type
+    mov edi, OFFSET nextCrateDrawable
+    mov eax, [(Drawable PTR edi).data_ptr]
+    call Crate_constructor, ebx, CRATE_Y_START, CRATE_WIDTH, CRATE_HEIGHT, eax
+    ;; set next crate type
+    call Utils_rand_max, CRATE_SPITES_LEN
+    mov eax, [crate_sprites + 4*eax]
+    mov [(Drawable PTR edi).data_ptr], eax
 
     ;;reset timer
     mov [spawn_crate_timer], 0
@@ -121,6 +133,9 @@ PROC Crate_update
 @@end_crates:
     pop ecx
     loop @@loop_crates
+
+    ;; draw next crate type
+    call Drawer_draw, OFFSET nextCrateDrawable
    
     ret
 ENDP
@@ -142,11 +157,30 @@ spawn_crate_timer db 0
 ;crate1 Drawable <120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>
 crates_active  db CRATES_MAX_COUNT/8 DUP(0)
 
-crate_filename db "sprites\rock.b", 0
+crate_rock_filename db "sprites\rock.b", 0
+crate_stone_filename db "sprites\stone.b", 0
+crate_wood_filename db "sprites\wood.b", 0
+crate_metal_filename db "sprites\metal.b", 0
+crate_card_filename db "sprites\card.b", 0
+
+;; contains next drawable to be drawn in the corner
+nextCrateDrawable Drawable <0,180,20,20,OFFSET crateRockSprite>
+
+crate_sprites dd OFFSET crateRockSprite,\
+                OFFSET crateStoneSprite,\
+                OFFSET crateWoodSprite,\
+                OFFSET crateMetalSprite,\
+                OFFSET crateCardSprite
 
 UDATASEG
 
 crates_objects Drawable CRATES_MAX_COUNT DUP(?)
-crateSprite db 400 DUP(?)
+
+;; sprites
+crateRockSprite db 400 DUP(?)
+crateStoneSprite db 400 DUP(?)
+crateWoodSprite db 400 DUP(?)
+crateMetalSprite db 400 DUP(?)
+crateCardSprite db 400 DUP(?)
 
 end

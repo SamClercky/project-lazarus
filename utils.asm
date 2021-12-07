@@ -5,6 +5,9 @@ ASSUME cs:_TEXT,ds:FLAT,es:FLAT,fs:FLAT,gs:FLAT
 
 include "utils.inc"
 
+RAND_A = 1103515245
+RAND_C = 12345
+
 CODESEG
 
 PROC Utils_set_active
@@ -183,5 +186,66 @@ PROC Utils_read_file
 @@return:
     ret
 ENDP
+
+;; mostly from examples
+PROC Utils_rand_init
+    USES eax, ecx, edx
+
+    mov ah, 02h ; system time
+    int 21h
+
+    ; mingle data
+    mov ax, dx
+    shl eax, 16
+    mov ax, cx
+
+    mov ah, 02Ah ; system date
+    int 21h
+
+    shl ecx, 16
+    mov cx, dx
+    xor eax, ecx
+
+    mov [rand_seed], eax
+    
+    ret
+ENDP
+
+;; code most from examples
+PROC Utils_rand
+    USES ebx, ecx, edx
+
+    mov eax, [rand_seed]
+    mov ecx, RAND_A
+    mul ecx
+    add eax, RAND_C
+    mov ebx, eax
+    shr ebx, 16
+
+    mul ecx
+    add eax, RAND_C
+    mov [rand_seed], eax
+    mov ax, bx
+
+    ret
+ENDP
+
+PROC Utils_rand_max
+    USES ebx, edx
+    ARG @@max:dword
+
+    call Utils_rand ; pseudo rand in eax
+    xor edx, edx
+    mov ebx, [@@max]
+    div ebx
+    
+    ;; remember mod
+    mov eax, edx
+    ret
+ENDP
+
+UDATASEG
+
+rand_seed dd ?
 
 end

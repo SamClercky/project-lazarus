@@ -16,6 +16,9 @@ WALL_SIZE equ 20
 KEY_CHECKS equ 4
 
 PROC Game_init
+    ;; init rand generator so other functions can use it
+    call Utils_rand_init
+    
     ;; init players and crates
     call Player_init
     call Crate_init
