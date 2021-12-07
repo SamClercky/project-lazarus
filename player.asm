@@ -16,6 +16,7 @@ PLAYER_X_START equ 20
 PLAYER_Y_START equ 120
 
 PLAYER_STEP equ 20
+PLAYER_INPUT_DELAY equ 10 ; make sure that moves are at least INPUT_DELAY apart
 
 CODESEG
 
@@ -38,6 +39,14 @@ PROC Player_update
     call Physics_apply_gravity_with_collision, esi, 1
     
     call Crate_spawn_new_crate, OFFSET player  ;; crates need to spawn on player x-coordinate (depending on time/amount of updates)
+
+    ;; update timer
+    mov al, [player_delay_timer]
+    test al, al 
+    jz @@end_timer ;; if not 0 dec timer
+    dec al
+    mov [player_delay_timer], al
+@@end_timer:
 
     ret
 ENDP
@@ -91,6 +100,12 @@ PROC Player_handle_input
     ARG @@input_ascii:dword
     USES eax, ebx, edx, esi
 
+    ;; test if movement is allowed
+    mov al, [player_delay_timer]
+    test al, al
+    jnz @@return ; may not move yet
+    mov [player_delay_timer], PLAYER_INPUT_DELAY ; reset timer and continue
+
     mov esi, OFFSET player
     mov eax, [@@input_ascii]
 
@@ -130,6 +145,8 @@ DATASEG
 
 player Drawable <PLAYER_X_START,PLAYER_Y_START,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>
 player_filename db "sprites\player.b", 0
+
+player_delay_timer db 0
 
 UDATASEG
 playerData db PLAYER_WIDTH*PLAYER_HEIGHT DUP(?)
