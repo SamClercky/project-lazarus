@@ -94,13 +94,13 @@ PROC Player_handle_input
     mov esi, OFFSET player
     mov eax, [@@input_ascii]
 
-    cmp eax, 4B00h
+    cmp eax, 4Bh
     je @@left
 
-    cmp eax, 4D00h
+    cmp eax, 4Dh
     je @@right
 
-    jmp @@return
+    jmp @@return ; ignore invalid keys
     
 @@left:
     call Player_collision_movement, DIR_LEFT

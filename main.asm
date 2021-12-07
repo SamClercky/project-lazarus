@@ -14,6 +14,7 @@ CODESEG
 PROC end_prog
     uses eax
     
+    call Game_deinit
     call disable_video
     mov ax, 4c00h
     int 21h
