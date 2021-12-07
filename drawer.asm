@@ -47,6 +47,27 @@ PROC Drawer_bg
     ret
 ENDP
 
+PROC Drawer_draw_txt
+    ARG @@x:dword, @@y:dword, @@str_ptr:dword
+    USES eax, ebx, ecx, edx
+
+    ;; set cursor pos
+    mov eax, [@@x] 
+    mov dl, al
+    mov eax, [@@y]
+    mov dh, al
+    mov bh, 0 ; page number
+    mov ah, 02h
+    int 10h ; set cursor to dx
+
+    mov ah, 09h ; print to screen
+    mov bx, 007Eh ; page number
+    mov edx, [@@str_ptr]
+    int 21h
+
+    ret 
+ENDP
+
 PROC Drawer_load_colorpalette
     USES eax, ebx, ecx, edx, esi, edi
 

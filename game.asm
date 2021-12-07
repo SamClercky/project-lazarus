@@ -24,17 +24,10 @@ PROC Game_init
     call Utils_read_file, OFFSET wallFileName, OFFSET wallSprite, 400
     call Utils_read_file, OFFSET bgFileName, OFFSET bgSprite, 200*320
 
-    ;; fill buffer with non random data -> less glitch at the start
-    call Drawer_bg, OFFSET bgSprite
-    call Drawer_update
-
-    ;; init physics
-    call Physics_add_static, OFFSET wallL
-    call Physics_add_static, OFFSET wallR
-    call Physics_add_static, OFFSET wallB
-
     ;; install custom keyhandler
     call __keyb_installKeyboardHandler
+    
+    call Game_reset
 
     ret
 ENDP
@@ -58,21 +51,63 @@ PROC Game_update
     call Game_draw_walls, 20, 15, 180, 10
     call Game_draw_walls, 300, 1, 0, 10
 
-    ;; entities
+    movzx ecx, [is_game_running]
+    mov eax, [OFFSET game_states + 4*ecx]
+    jmp eax
+
+game_first_start:
+    ;; draw welcome screen
+    ;; update screen
+    call Drawer_update ;; update after entity update
+
+    call Drawer_draw_txt, 15, 10, OFFSET game_begin_msg
+    call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
+    
+    jmp @@game_end_update
+
+game_running:
+    ;; draw and update entities
     call Player_update
     call Crate_update
     ;;; make new crates --> in Player_update
 
-
     ;; update screen
-    call Drawer_update
+    call Drawer_update ;; update after entity update
+
+    jmp @@game_end_update
+
+game_game_won:
+    ;; draw won screen
+    ;; update screen
+    call Drawer_update ;; update after entity update
+
+    call Drawer_draw_txt, 15, 10, OFFSET game_begin_msg
+    call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
+
+    jmp @@game_end_update
+
+game_game_over:
+    ;; draw game over screen
+
+    call Drawer_draw_txt, 15, 10, OFFSET game_over_msg
+    call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
+
+    jmp @@game_end_update
+
+@@game_end_update:
     
     ;; handle game input and return eax to see if the game loop needs to end
     call Game_handle_input
-    cmp eax, 1 ; if Esc is pressed the program ends
-    je @@return
+    test eax, eax ; if Esc is pressed the program ends
+    jnz @@return
 
     call Player_check_dead
+    test eax, eax
+    jz @@end_check_dead
+    mov [is_game_running], 2 
+    xor eax, eax ; reset eax so, the program does not end
+
+@@end_check_dead:
 
 @@return:
     ret
@@ -267,6 +302,17 @@ PROC Game_handle_input
     ;; process key
     call Player_handle_input, eax ; eax contains keycode
 
+    ;; (re)start game if not running
+    movzx ebx, [is_game_running] ;; if running 1
+    dec ebx ;; if running 0
+    test ebx, ebx
+    jz @@end_restart 
+
+    call Game_reset
+    mov [is_game_running], 1 ; continue game
+
+@@end_restart:
+
 @@keys_end:
     loop @@next_key
 
@@ -283,6 +329,28 @@ PROC Game_handle_input
     ret
 ENDP
 
+;; set/reset game
+PROC Game_reset
+
+    call Physics_reset
+    call Crate_reset
+    call Player_reset
+
+    mov [is_game_running], 0
+
+    ;; set initial vars for game 
+    ;; fill buffer with non random data -> less glitch at the start
+    call Drawer_bg, OFFSET bgSprite
+    call Drawer_update
+
+    ;; init physics
+    call Physics_add_static, OFFSET wallL
+    call Physics_add_static, OFFSET wallR
+    call Physics_add_static, OFFSET wallB
+
+    ret
+ENDP
+
 DATASEG
 
   ;; are there only for the physics
@@ -295,8 +363,19 @@ DATASEG
   wallFileName db "sprites\wall.b", 0
   wallDrawable Drawable <0,0,20,20,OFFSET wallSprite>
 
+  ;; Game is running, contains current game state (index of game_states)
+  is_game_running db 0
+
   ;;               T    L    B    R
   keybscancodes db 48h, 4Bh, 50h, 4Dh
+
+  ;;             0                 1             2               3
+  game_states dd game_first_start, game_running, game_game_over, game_game_won
+
+  ;; game messages
+  game_begin_msg db "START GAME", '$'
+  game_over_msg db "GAME OVER", '$'
+  game_start_msg db "Press any ARROW key", '$'
 
 UDATASEG
   wallSprite db 400 DUP(?)

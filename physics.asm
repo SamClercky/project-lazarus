@@ -9,6 +9,27 @@ include "utils.inc"
 
 CODESEG
 
+PROC Physics_reset
+    USES eax, ecx, edi
+
+    mov ecx, STATIC_OBJECT_MAX_COUNT/8
+    mov edi, OFFSET static_active
+    xor eax, eax
+    rep stosb
+
+    mov ecx, MOVING_OBJECT_MAX_COUNT/8
+    mov edi, OFFSET moving_active
+    xor eax, eax
+    rep stosb
+
+    mov ecx, DYNAMIC_OBJECT_MAX_COUNT/8
+    mov edi, OFFSET dynamic_active
+    xor eax, eax
+    rep stosb
+
+    ret
+ENDP
+
 PROC Physics_add_static
     ARG @@drawer_ptr:dword
     call Utils_add_to_container, [@@drawer_ptr], OFFSET static_active, OFFSET static_objects, STATIC_OBJECT_MAX_COUNT

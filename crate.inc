@@ -1,4 +1,5 @@
 GLOBAL Crate_update:PROC,\
+    Crate_reset:PROC,\
     Crate_constructor:PROC,\
     Crate_init:PROC,\
     Crate_spawn_new_crate:PROC

@@ -22,13 +22,32 @@ CODESEG
 
 ;; inits player and adds it to the physics engine
 PROC Player_init
-    call Physics_add_dynamic, OFFSET player
-
     ;; load sprite data
     call Utils_read_file, OFFSET player_filename, OFFSET playerData, PLAYER_WIDTH*PLAYER_HEIGHT
     call Utils_read_file, OFFSET player_scared_filename, OFFSET playerScaredData, PLAYER_WIDTH*PLAYER_HEIGHT
 
+    ;; setup player
+    call Player_reset
+
     ret
+ENDP
+
+;; sets and resets the player
+PROC Player_reset
+    USES esi
+
+    call Physics_add_dynamic, OFFSET player
+
+    ;; reset player
+    mov esi, OFFSET player
+    mov [(Drawable PTR esi).x], PLAYER_X_START
+    mov [(Drawable PTR esi).y], PLAYER_Y_START
+
+    ;; reset falling crate position
+    mov [player_scared_x], 0
+
+    ret
+
 ENDP
 
 PROC Player_update

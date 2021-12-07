@@ -94,7 +94,7 @@ PROC Crate_spawn_new_crate
 ENDP
 
 PROC Crate_update
-   USES esi, ecx, eax, ebx
+   USES esi, ecx, eax, ebx, edx
 
 ;; call Crate_spawn_new_crate --> called from Player_update
 
@@ -112,7 +112,7 @@ PROC Crate_update
     mov esi, OFFSET crates_objects
     mov ebx, DRAWABLE_BYTES ;drawable is 12 bytes
     mov eax, ecx
-    mul ebx
+    mul ebx ; edx:eax
     add esi, eax
 
     call Drawer_draw, esi
@@ -122,6 +122,18 @@ PROC Crate_update
     pop ecx
     loop @@loop_crates
    
+    ret
+ENDP
+
+PROC Crate_reset
+    USES eax, ecx, edi
+
+    mov [spawn_crate_timer], 0
+    mov ecx, CRATES_MAX_COUNT/8
+    mov edi, OFFSET crates_active
+    xor eax, eax
+    rep stosb
+
     ret
 ENDP
 
