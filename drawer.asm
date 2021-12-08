@@ -49,22 +49,43 @@ ENDP
 
 PROC Drawer_draw_txt
     ARG @@x:dword, @@y:dword, @@str_ptr:dword
-    USES eax, ebx, ecx, edx
+    USES eax, ebx, ecx, edx, esi
 
-    ;; set cursor pos
-    mov eax, [@@x] 
+    mov esi, [@@str_ptr]
+
+    mov ax, 1003h
+    mov bx, 0000h
+    int 10h ; disable blinking
+
+    ;; start pos
+    mov eax, [@@x]
     mov dl, al
     mov eax, [@@y]
     mov dh, al
-    mov bh, 0 ; page number
+
+    mov ecx, 1
+
+@@next_print_char:
+
+    ;; set cursor
     mov ah, 02h
-    int 10h ; set cursor to dx
+    mov bh, 00h
+    int 10h
 
-    mov ah, 09h ; print to screen
-    mov bx, 007Eh ; page number
-    mov edx, [@@str_ptr]
-    int 21h
+    inc dl ; move cursor
 
+    mov al, [esi] ; next char
+    cmp al, '$' ; check if end is near
+    je @@return
+
+    inc esi ; inc pointer
+
+    mov ah, 09h
+    mov bx, 0007h
+    int 10h
+    jmp @@next_print_char
+
+@@return:
     ret 
 ENDP
 
@@ -156,8 +177,8 @@ PROC Drawer_draw
     ;rep movsb
 @@width_write:
     mov al, [esi]
-    test al, al
-    jz @@end_width_write ; conditionally move byte if not transparant
+    cmp al, 1 ; transparancy color
+    je @@end_width_write ; conditionally move byte if not transparant
     mov [edi], al
 @@end_width_write:
     inc edi ; setup for next round
