@@ -177,6 +177,14 @@ PROC Player_check_dead
     ret
 ENDP
 
+PROC Player_check_win
+    ARG @@button_ptr:dword
+
+    call Physics_is_colliding, OFFSET player, [@@button_ptr], DIR_MIDDLE ; eax = 1 if player is standing on the button
+
+    ret
+ENDP
+
 DATASEG
 
 player Drawable <PLAYER_X_START,PLAYER_Y_START,PLAYER_WIDTH,PLAYER_HEIGHT,offset playerData>

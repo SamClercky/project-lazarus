@@ -15,9 +15,17 @@ CODESEG
 WALL_SIZE equ 20
 KEY_CHECKS equ 4
 
+BUTTON_WIDTH equ 20
+BUTTON_HEIGHT equ 20
+BUTTON_START_X equ 120
+BUTTON_START_Y equ 120
+
 PROC Game_init
     ;; init rand generator so other functions can use it
     call Utils_rand_init
+    
+    ;; init button
+    call Utils_read_file, OFFSET button_filename, OFFSET buttonData, BUTTON_WIDTH*BUTTON_HEIGHT
     
     ;; init players and crates
     call Player_init
@@ -53,6 +61,9 @@ PROC Game_update
     call Game_draw_walls, 0, 1, 0, 10
     call Game_draw_walls, 20, 15, 180, 10
     call Game_draw_walls, 300, 1, 0, 10
+    
+    ;; draw button
+    call Drawer_draw, OFFSET button
 
     movzx ecx, [is_game_running]
     mov eax, [OFFSET game_states + 4*ecx]
@@ -80,11 +91,9 @@ game_running:
     jmp @@game_end_update
 
 game_game_won:
-    ;; draw won screen
-    ;; update screen
-    call Drawer_update ;; update after entity update
+    ;; draw winning screen
 
-    call Drawer_draw_txt, 15, 10, OFFSET game_begin_msg
+    call Drawer_draw_txt, 15, 10, OFFSET game_won_msg
     call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
 
     jmp @@game_end_update
@@ -109,8 +118,18 @@ game_game_over:
     jz @@end_check_dead
     mov [is_game_running], 2 
     xor eax, eax ; reset eax so, the program does not end
+    jmp @@return
 
 @@end_check_dead:
+
+    call Player_check_win, OFFSET button
+    test eax, eax
+    jz @@end_check_win
+    mov [is_game_running], 3
+    xor eax, eax ; reset eax so, the program does not end
+    jmp @@return
+
+@@end_check_win:
 
 @@return:
     ret
@@ -355,7 +374,10 @@ PROC Game_reset
 ENDP
 
 DATASEG
-
+  
+  ;; button
+  button Drawable <BUTTON_START_X,BUTTON_START_Y,BUTTON_WIDTH,BUTTON_HEIGHT,offset buttonData>
+  
   ;; are there only for the physics
   wallL Drawable <0,0,20,200,?>
   wallB Drawable <10,180,300,20,?>
@@ -365,6 +387,9 @@ DATASEG
   bgFileName db "sprites\bg.b", 0
   wallFileName db "sprites\wall.b", 0
   wallDrawable Drawable <0,0,20,20,OFFSET wallSprite>
+  
+  ;; sprite for button
+  button_filename db "sprites\btn.b", 0
 
   ;; Game is running, contains current game state (index of game_states)
   is_game_running db 0
@@ -379,10 +404,12 @@ DATASEG
   game_begin_msg db "START GAME", '$'
   game_over_msg db "GAME OVER", '$'
   game_start_msg db "Press any ARROW key", '$'
+  game_won_msg db "YOU WON", '$'
 
 UDATASEG
   wallSprite db 400 DUP(?)
   bgSprite db 200*320 DUP(?)
+  buttonData db BUTTON_WIDTH*BUTTON_HEIGHT DUP(?)
   
   ;; mostly from example MYKEYB
   originalKeyboardHandlerS	dw ?			; SELECTOR of original keyboard handler
