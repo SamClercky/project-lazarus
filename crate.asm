@@ -13,6 +13,7 @@ CRATE_HEIGHT equ 20
 CRATE_Y_START equ 0
 
 CRATE_SPITES_LEN equ 5
+CRATE_SPAWN_DELAY equ 120
 
 CODESEG
 
@@ -73,7 +74,7 @@ PROC Crate_spawn_new_crate
 
     ;; check timer --> create new one or not
     movzx eax, [spawn_crate_timer]
-    cmp eax, 120     ;; indicator for time, after how many Game_updates
+    cmp eax, CRATE_SPAWN_DELAY     ;; indicator for time, after how many Game_updates
     jl @@update_timer
 
     ;; make new crate

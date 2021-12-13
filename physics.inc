@@ -1,5 +1,6 @@
 GLOBAL Physics_apply_gravity:PROC,\
     Physics_apply_gravity_with_collision:PROC,\
+    Physics_check_colliding_loop:PROC,\
     Physics_check_colliding:PROC,\
     Physics_is_colliding:PROC,\
     Physics_point_in_obj:PROC,\

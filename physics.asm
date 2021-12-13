@@ -82,6 +82,41 @@ PROC Physics_apply_gravity_with_collision
     ret
 ENDP
 
+PROC Physics_check_colliding_loop
+    ARG @@active_ptr:dword, @@objects_ptr:dword, @@max_count:dword, @@drawer_ptr:dword, @@direction:dword
+    USES ecx, edi
+
+    xor eax, eax
+    mov ecx, [@@max_count]
+@@loop_check_colliding:
+    push ecx
+    dec ecx ; ecx in [0-len)
+
+    call Utils_get_if_active, [@@active_ptr], [@@objects_ptr], ecx
+    test eax, eax ; test if active
+    jz @@end_loop ; if NULL -> not active
+    
+    ;; check collision
+    mov edi, eax ; dest PTR currently in eax
+    call Physics_is_colliding, [@@drawer_ptr], [DWORD PTR edi], [@@direction]
+    test eax, eax ; test if collision
+    jz @@end_loop ; if NULL -> no collision -> continue
+    ;;; collision found
+    mov eax, [edi]
+    pop ecx ; cleaning
+    jmp @@return
+
+@@end_loop:
+    pop ecx
+    loop @@loop_check_colliding
+    
+    ;; no collision found
+    xor eax, eax
+
+@@return:
+    ret
+ENDP
+
 ;; return the pointer to the first colliding object
 ;; direction: enum { UP=0, LEFT=1, BOTTOM=2, RIGHT=4, MIDDLE=8}
 PROC Physics_check_colliding
@@ -90,77 +125,17 @@ PROC Physics_check_colliding
 
     mov esi, [@@drawer_ptr]
 
-    ;; STATIC
-    mov ecx, STATIC_OBJECT_MAX_COUNT
-@@loop_static:
-    push ecx
-    dec ecx ; ecx in [0-len)
+    call Physics_check_colliding_loop, OFFSET static_active, OFFSET static_objects, STATIC_OBJECT_MAX_COUNT, esi, [@@direction]
+    test eax, eax
+    jnz @@return ; collision found (eax contains collision object)
 
-    call Utils_get_if_active, OFFSET static_active, OFFSET static_objects, ecx
-    test eax, eax ; test if active
-    jz @@end_static ; if NULL -> not active
+    call Physics_check_colliding_loop, OFFSET dynamic_active, OFFSET dynamic_objects, DYNAMIC_OBJECT_MAX_COUNT, esi, [@@direction]
+    test eax, eax
+    jnz @@return ; collision found (eax contains collision object)
     
-    ;; check collision
-    mov edi, eax ; dest PTR currently in eax
-    call Physics_is_colliding, esi, [DWORD PTR edi], [@@direction]
-    test eax, eax ; test if collision
-    jz @@end_static ; if NULL -> no collision -> continue
-    ;;; collision found
-    mov eax, [edi]
-    pop ecx ; cleaning
-    jmp @@return
-
-@@end_static:
-    pop ecx
-    loop @@loop_static
-
-    ;; DYNAMIC
-    mov ecx, DYNAMIC_OBJECT_MAX_COUNT
-@@dyn_loop:
-    push ecx
-    dec ecx ; ecx in [0-len)
-
-    call Utils_get_if_active, OFFSET dynamic_active, OFFSET dynamic_objects, ecx
-    test eax, eax ; test if active
-    jz @@end_dyn ; if NULL -> not active
-    
-    ;; check collision
-    mov edi, eax ; dest PTR currently in eax
-    call Physics_is_colliding, esi, [DWORD PTR edi], [@@direction]
-    test eax, eax ; test if collision
-    jz @@end_dyn ; if NULL -> no collision -> continue
-    ;;; collision found
-    mov eax, [edi]
-    pop ecx ; cleaning
-    jmp @@return
-
-@@end_dyn:
-    pop ecx
-    loop @@dyn_loop
-
-    ;; MOVING
-    mov ecx, MOVING_OBJECT_MAX_COUNT
-@@loop_mov:
-    push ecx
-    dec ecx ; ecx in [0-len)
-
-    call Utils_get_if_active, OFFSET moving_active, OFFSET moving_objects, ecx
-    test eax, eax ; test if active
-    jz @@end_mov ; if NULL -> not active
-    
-    ;; check collision
-    mov edi, eax ; dest PTR currently in eax
-    call Physics_is_colliding, esi, [DWORD PTR edi], [@@direction]
-    test eax, eax ; test if collision
-    jz @@end_mov ; if NULL -> no collision -> continue
-    ;;; collision found
-    mov eax, [edi]
-    pop ecx ; cleaing
-    jmp @@return
-
-@@end_mov:
-    pop ecx
-    loop @@loop_mov
+    call Physics_check_colliding_loop, OFFSET moving_active, OFFSET moving_objects, MOVING_OBJECT_MAX_COUNT, esi, [@@direction]
+    test eax, eax
+    jnz @@return ; collision found (eax contains collision object)
 
     ;; none found
     xor eax, eax
