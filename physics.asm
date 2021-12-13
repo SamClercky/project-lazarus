@@ -353,8 +353,8 @@ UDATASEG
 
 ;; storage pools for the physics engine
 ;; contains pointers to drawable objects
-moving_objects  dd MOVING_OBJECT_MAX_COUNT  DUP(?) ; objects that move (playing + falling crates)
+moving_objects  dd MOVING_OBJECT_MAX_COUNT  DUP(?) ; objects that move (player)
 static_objects  dd STATIC_OBJECT_MAX_COUNT  DUP(?) ; objects that do not move
-dynamic_objects dd DYNAMIC_OBJECT_MAX_COUNT DUP(?) ; objects that move but can change (fallen crates)
+dynamic_objects dd DYNAMIC_OBJECT_MAX_COUNT DUP(?) ; objects that move but can change (crates)
 
 end

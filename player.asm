@@ -36,7 +36,7 @@ ENDP
 PROC Player_reset
     USES esi
 
-    call Physics_add_dynamic, OFFSET player
+    call Physics_add_moving, OFFSET player
 
     ;; reset player
     mov esi, OFFSET player

@@ -105,8 +105,60 @@ PROC Crate_spawn_new_crate
     ret
 ENDP
 
+;; eax=0 when not getting squished by heavier crate
+;; eax=1 crate is getting squished
+PROC Crate_check_squished
+    ARG @@crate_drawable_ptr:dword
+    USES ebx, edi, esi
+
+    xor eax, eax
+    mov esi, [@@crate_drawable_ptr]
+    ;;check for a object on top of current crate
+    call Physics_check_colliding, esi, DIR_UP
+    test eax, eax
+    jz @@not_squished
+    
+    mov edi, eax ;eax points to current object on top of the crate
+    ;; check if object is another crate (and not the player)
+    xor eax, eax
+    mov eax, [(Drawable PTR edi).data_ptr]
+    cmp eax, OFFSET crateCardSprite
+    jl @@not_squished
+    cmp eax, OFFSET crateRockSprite
+    jg @@not_squished
+    
+    ;;object is a crate, check if crate is heavier
+    mov ebx, [(Drawable PTR esi).data_ptr]
+    cmp eax, ebx
+    jle @@not_squished
+    jmp @@squished
+
+@@not_squished:
+    xor eax, eax
+    jmp @@return
+
+@@squished:
+    mov eax, 1
+
+@@return:
+    ret
+ENDP
+
+PROC Crate_remove
+    ARG @@active_crates_index:dword
+    USES eax
+
+    xor eax, eax
+    mov eax , [@@active_crates_index]
+    call Utils_set_active, OFFSET crates_active, eax, 0
+    ;; remove current crate in physics
+    call Physics_del_dynamic, eax ; index for dynamic_active container in physics is consistent with crates_active container (because it only contains the crates)
+
+    ret
+ENDP
+
 PROC Crate_update
-   USES esi, ecx, eax, ebx, edx
+    USES esi, ecx, eax, ebx, edx
 
 ;; call Crate_spawn_new_crate --> called from Player_update
 
@@ -127,8 +179,13 @@ PROC Crate_update
     mul ebx ; edx:eax
     add esi, eax
 
+    
     call Drawer_draw, esi
     call Physics_apply_gravity_with_collision, esi, 1
+    call Crate_check_squished, esi
+    test eax, eax
+    jz @@end_crates ; crate is not getting squished by heavier crate
+    call Crate_remove, ecx
 
 @@end_crates:
     pop ecx
@@ -154,7 +211,6 @@ ENDP
 
 DATASEG
 spawn_crate_timer db 0
-;crate1 Drawable <120,10,CRATE_WIDTH,CRATE_HEIGHT,offset crateSprite>
 crates_active  db CRATES_MAX_COUNT/8 DUP(0)
 
 crate_rock_filename db "sprites\rock.b", 0
@@ -166,21 +222,21 @@ crate_card_filename db "sprites\card.b", 0
 ;; contains next drawable to be drawn in the corner
 nextCrateDrawable Drawable <0,180,20,20,OFFSET crateRockSprite>
 
-crate_sprites dd OFFSET crateRockSprite,\
-                OFFSET crateStoneSprite,\
+crate_sprites dd OFFSET crateCardSprite,\
                 OFFSET crateWoodSprite,\
+                OFFSET crateStoneSprite,\
                 OFFSET crateMetalSprite,\
-                OFFSET crateCardSprite
+                OFFSET crateRockSprite
 
 UDATASEG
 
 crates_objects Drawable CRATES_MAX_COUNT DUP(?)
 
 ;; sprites
-crateRockSprite db 400 DUP(?)
-crateStoneSprite db 400 DUP(?)
-crateWoodSprite db 400 DUP(?)
-crateMetalSprite db 400 DUP(?)
 crateCardSprite db 400 DUP(?)
+crateWoodSprite db 400 DUP(?)
+crateStoneSprite db 400 DUP(?)
+crateMetalSprite db 400 DUP(?)
+crateRockSprite db 400 DUP(?)
 
 end
