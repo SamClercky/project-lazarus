@@ -142,9 +142,13 @@ game_game_over:
     call Player_check_dead
     test eax, eax
     jz @@end_check_dead
+    ;;reset level 
+    mov [level], 1
+    ;; change game state
     mov [is_game_running], GAME_OVER
     mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
     call Game_reset ; reset for next time
+
     xor eax, eax ; reset eax so, the program does not end
     jmp @@return
 
@@ -153,15 +157,16 @@ game_game_over:
     call Player_check_win, OFFSET button
     test eax, eax
     jz @@end_check_win
-    mov [is_game_running], GAME_WON
-    mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
-    call Game_reset ; reset for next time
-
+    
     ;;update level
     xor eax, eax
     mov al, [level]
     inc al
     mov [level], al
+    ;; change game state
+    mov [is_game_running], GAME_WON
+    mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
+    call Game_reset ; reset for next time
 
     xor eax, eax ; reset eax so, the program does not end
     jmp @@return
@@ -408,6 +413,7 @@ PROC Game_reset
     call Physics_add_static, OFFSET wallB
     
     ;;reset button position
+    xor ebx ,ebx
     mov edi, OFFSET button
     ; change x position
     call Utils_rand_max, BUTTON_MAX_X_COORDINATE
