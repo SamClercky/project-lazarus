@@ -251,8 +251,8 @@ crates_objects Drawable CRATES_MAX_COUNT DUP(?)
 ;; sprites
 crateCardSprite db 400 DUP(?)
 crateWoodSprite db 400 DUP(?)
-crateStoneSprite db 400 DUP(?)
 crateMetalSprite db 400 DUP(?)
+crateStoneSprite db 400 DUP(?)
 crateRockSprite db 400 DUP(?)
 
 end
