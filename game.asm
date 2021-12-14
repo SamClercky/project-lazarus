@@ -17,8 +17,19 @@ KEY_CHECKS equ 4
 
 BUTTON_WIDTH equ 20
 BUTTON_HEIGHT equ 20
-BUTTON_START_X equ 120
-BUTTON_START_Y equ 120
+BUTTON_START_X equ BUTTON_MIN_X_COORDINATE*BUTTON_WIDTH
+BUTTON_START_Y equ BUTTON_MIN_Y_COORDINATE*BUTTON_HEIGHT
+; button coordinates (used for random button position generation each level)
+BUTTON_MIN_X_COORDINATE equ 1 ; because on 0 x-coordinate the side walls are located
+BUTTON_MIN_Y_COORDINATE equ 0
+BUTTON_MAX_X_COORDINATE equ 14
+BUTTON_MAX_Y_COORDINATE equ 6
+
+;; game_states 
+GAME_FIRST_START equ 0
+GAME_RUNNING equ 1
+GAME_OVER equ 2
+GAME_WON equ 3
 
 GAME_STATE_CHANGED_DELAY equ 10
 
@@ -131,7 +142,7 @@ game_game_over:
     call Player_check_dead
     test eax, eax
     jz @@end_check_dead
-    mov [is_game_running], 2 
+    mov [is_game_running], GAME_OVER
     mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
     call Game_reset ; reset for next time
     xor eax, eax ; reset eax so, the program does not end
@@ -142,9 +153,16 @@ game_game_over:
     call Player_check_win, OFFSET button
     test eax, eax
     jz @@end_check_win
-    mov [is_game_running], 3
+    mov [is_game_running], GAME_WON
     mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
     call Game_reset ; reset for next time
+
+    ;;update level
+    xor eax, eax
+    mov al, [level]
+    inc al
+    mov [level], al
+
     xor eax, eax ; reset eax so, the program does not end
     jmp @@return
 
@@ -371,9 +389,12 @@ ENDP
 
 ;; set/reset game
 PROC Game_reset
+    USES ebx
 
     call Physics_reset
-    call Crate_reset
+    xor ebx, ebx
+    mov bl, [level]
+    call Crate_reset, ebx
     call Player_reset
 
     ;; set initial vars for game 
@@ -385,12 +406,33 @@ PROC Game_reset
     call Physics_add_static, OFFSET wallL
     call Physics_add_static, OFFSET wallR
     call Physics_add_static, OFFSET wallB
+    
+    ;;reset button position
+    mov edi, OFFSET button
+    ; change x position
+    call Utils_rand_max, BUTTON_MAX_X_COORDINATE
+    xor ebx, ebx
+    mov ebx, BUTTON_WIDTH
+    mul ebx
+    add ax, BUTTON_WIDTH ; side wall offset
+    mov [(Drawable PTR edi).x], ax
+    ; change y position
+    call Utils_rand_max, BUTTON_MAX_Y_COORDINATE
+    xor ebx, ebx
+    mov ebx, BUTTON_HEIGHT
+    mul ebx
+    mov [(Drawable PTR edi).y], ax
+
+
 
     ret
 ENDP
 
 DATASEG
   
+  ;; current level
+  level db 1
+
   ;; button
   button Drawable <BUTTON_START_X,BUTTON_START_Y,BUTTON_WIDTH,BUTTON_HEIGHT,offset buttonData>
   
