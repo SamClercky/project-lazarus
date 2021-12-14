@@ -3,7 +3,8 @@ GLOBAL Drawer_bg:PROC,\
     enable_video:PROC,\
     Drawer_draw:PROC,\
     Drawer_update:PROC,\
-    Drawer_draw_txt:PROC
+    Drawer_draw_txt:PROC,\
+    Draw_number:PROC
 
 STRUC Drawable
     x        dw 0

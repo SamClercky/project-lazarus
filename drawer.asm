@@ -89,6 +89,31 @@ PROC Drawer_draw_txt
     ret 
 ENDP
 
+;; Draws a 2 digit number to the screen
+PROC Draw_number
+    ARG @@x:dword, @@y:dword, @@number:dword
+    USES eax, ebx, ecx, edx, esi
+
+    xor edx, edx
+    mov eax, [@@number]
+    mov ebx, 10
+
+    div ebx
+
+    add eax, '0'
+    add edx, '0'
+
+    ;; Create string in memory
+    mov [BYTE OFFSET number_string_buffer    ], al
+    mov [BYTE OFFSET number_string_buffer + 1], dl
+    mov [BYTE OFFSET number_string_buffer + 2], '$'
+
+    ;; draw string
+    call Drawer_draw_txt, [@@x], [@@y], OFFSET number_string_buffer
+
+    ret
+ENDP
+
 PROC Drawer_load_colorpalette
     USES eax, ebx, ecx, edx, esi, edi
 
@@ -230,5 +255,7 @@ UDATASEG
 ;; Writing to back buffer for less flicker
 back_buffer db WINDOW_WIDTH*WINDOW_HEIGHT DUP(?)
 color_palette db 256*4 DUP(?)
+
+number_string_buffer db 3 DUP(?)
 
 end
