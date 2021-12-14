@@ -25,6 +25,10 @@ BUTTON_MIN_Y_COORDINATE equ 0
 BUTTON_MAX_X_COORDINATE equ 14
 BUTTON_MAX_Y_COORDINATE equ 6
 
+;level
+LEVEL_X equ 37
+LEVEL_Y equ 1
+
 ;; game_states 
 GAME_FIRST_START equ 0
 GAME_RUNNING equ 1
@@ -63,6 +67,8 @@ PROC Game_deinit
 ENDP
 
 PROC Game_update
+    USES ebx, ecx
+
     ;; drawing
     ;;; background
     call Drawer_bg, OFFSET bgSprite
@@ -71,7 +77,7 @@ PROC Game_update
     call Game_draw_walls, 0, 1, 0, 10
     call Game_draw_walls, 20, 15, 180, 10
     call Game_draw_walls, 300, 1, 0, 10
-    
+
     ;; draw button
     call Drawer_draw, OFFSET button
     
@@ -172,6 +178,10 @@ game_game_over:
     jmp @@return
 
 @@end_check_win:
+
+    ;; draw level
+    movzx ebx, [level]
+    call Draw_number, LEVEL_X, LEVEL_Y, ebx
 
 @@return:
     ret

@@ -14,8 +14,8 @@ GLOBAL Physics_apply_gravity:PROC,\
 
 ;; needs to be multiple of 8, because the maps are in groups of 1 byte (8 bits)
 MOVING_OBJECT_MAX_COUNT  equ 8
-STATIC_OBJECT_MAX_COUNT  equ 16
-DYNAMIC_OBJECT_MAX_COUNT equ 16
+STATIC_OBJECT_MAX_COUNT  equ 8
+DYNAMIC_OBJECT_MAX_COUNT equ 64
 
 ;; directions that can be tested
 DIR_UP     equ 0
