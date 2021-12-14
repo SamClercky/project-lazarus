@@ -31,6 +31,8 @@ GAME_RUNNING equ 1
 GAME_OVER equ 2
 GAME_WON equ 3
 
+GAME_STATE_CHANGED_DELAY equ 10
+
 PROC Game_init
     ;; init rand generator so other functions can use it
     call Utils_rand_init
@@ -66,15 +68,21 @@ PROC Game_update
     call Drawer_bg, OFFSET bgSprite
 
     ;;; walls
-    ;call Drawer_draw, OFFSET wallL
-    ;call Drawer_draw, OFFSET wallR
-    ;call Drawer_draw, OFFSET wallB
     call Game_draw_walls, 0, 1, 0, 10
     call Game_draw_walls, 20, 15, 180, 10
     call Game_draw_walls, 300, 1, 0, 10
     
     ;; draw button
     call Drawer_draw, OFFSET button
+    
+    ;; decrement input delay timer
+    mov al, [game_state_changed_timer]
+    test al, al
+    jz @@game_update_end_update_timer
+    dec al
+    mov [game_state_changed_timer], al
+
+@@game_update_end_update_timer:
 
     movzx ecx, [is_game_running]
     mov eax, [OFFSET game_states + 4*ecx]
@@ -120,14 +128,23 @@ game_game_over:
 @@game_end_update:
     
     ;; handle game input and return eax to see if the game loop needs to end
+    mov al, [game_state_changed_timer]
+    test al, al
+    jnz @@game_end_input ; prevent keys to be pressed while in transition
+
+    ;; process input
     call Game_handle_input
     test eax, eax ; if Esc is pressed the program ends
     jnz @@return
+
+@@game_end_input:
 
     call Player_check_dead
     test eax, eax
     jz @@end_check_dead
     mov [is_game_running], GAME_OVER
+    mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
+    call Game_reset ; reset for next time
     xor eax, eax ; reset eax so, the program does not end
     jmp @@return
 
@@ -137,6 +154,9 @@ game_game_over:
     test eax, eax
     jz @@end_check_win
     mov [is_game_running], GAME_WON
+    mov [game_state_changed_timer], GAME_STATE_CHANGED_DELAY ; set delay in transition
+    call Game_reset ; reset for next time
+
     ;;update level
     xor eax, eax
     mov al, [level]
@@ -347,7 +367,6 @@ PROC Game_handle_input
     test ebx, ebx
     jz @@end_restart 
 
-    call Game_reset
     mov [is_game_running], 1 ; continue game
 
 @@end_restart:
@@ -377,8 +396,6 @@ PROC Game_reset
     mov bl, [level]
     call Crate_reset, ebx
     call Player_reset
-
-    mov [is_game_running], GAME_FIRST_START
 
     ;; set initial vars for game 
     ;; fill buffer with non random data -> less glitch at the start
@@ -447,6 +464,7 @@ DATASEG
   game_start_msg db "Press any ARROW key", '$'
   game_won_msg db "YOU WON", '$'
 
+  game_state_changed_timer db GAME_STATE_CHANGED_DELAY
 UDATASEG
   wallSprite db 400 DUP(?)
   bgSprite db 200*320 DUP(?)
