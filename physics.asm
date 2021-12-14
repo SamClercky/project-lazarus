@@ -7,6 +7,8 @@ include "physics.inc"
 include "drawer.inc"
 include "utils.inc"
 
+PHYSICS_HALF_BOX equ 10
+
 CODESEG
 
 PROC Physics_reset
@@ -265,8 +267,8 @@ PROC Physics_is_colliding
 
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
-    inc eax
-    inc ebx
+    add eax, PHYSICS_HALF_BOX ; add half a box
+    add ebx, PHYSICS_HALF_BOX ; add half a box
     call Physics_point_in_obj, edi, eax, ebx
     test eax, eax
     jz @@no_collision
