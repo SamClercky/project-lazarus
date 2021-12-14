@@ -79,7 +79,7 @@ PROC Crate_spawn_new_crate
 
     ;; make new crate
     mov esi, [@@player_ptr]
-    movzx ebx, [(Drawable PTR esi).x] ;; store x in eax
+    movzx ebx, [(Drawable PTR esi).x] ;; retrieve x
     ;; get new crate type
     mov edi, OFFSET nextCrateDrawable
     mov eax, [(Drawable PTR edi).data_ptr]
@@ -88,6 +88,7 @@ PROC Crate_spawn_new_crate
     call Utils_rand_max, CRATE_SPITES_LEN
     mov eax, [crate_sprites + 4*eax]
     mov [(Drawable PTR edi).data_ptr], eax
+    mov eax, ebx ; store x in eax
 
     ;;reset timer
     mov [spawn_crate_timer], 0
