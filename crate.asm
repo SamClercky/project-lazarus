@@ -15,6 +15,8 @@ CRATE_Y_START equ 0
 CRATE_SPITES_LEN equ 5
 CRATE_SPAWN_DELAY equ 120
 
+CRATE_GRAVITY_ADDER equ 5
+
 CODESEG
 
 PROC Crate_init
@@ -183,7 +185,9 @@ PROC Crate_update
 
     
     call Drawer_draw, esi
-    call Physics_apply_gravity_with_collision, esi, 1
+    xor eax, eax
+    mov al, [current_gravity]
+    call Physics_apply_gravity_with_collision, esi, eax
     call Crate_check_squished, esi
     test eax, eax
     jz @@end_crates ; crate is not getting squished by heavier crate
@@ -200,7 +204,16 @@ PROC Crate_update
 ENDP
 
 PROC Crate_reset
+    ARG @@level:dword
     USES eax, ecx, edi
+
+    xor eax, eax
+    ; update level difficulty for crate dynamics
+    mov eax, [@@level]
+    mov [current_gravity], al
+ ;   mov al, [current_gravity]
+ ;   add al, CRATE_GRAVITY_ADDER
+ ;   mov [current_gravity], al
 
     mov [spawn_crate_timer], 0
     mov ecx, CRATES_MAX_COUNT/8
@@ -212,6 +225,7 @@ PROC Crate_reset
 ENDP
 
 DATASEG
+current_gravity db 1
 spawn_crate_timer db 0
 crates_active  db CRATES_MAX_COUNT/8 DUP(0)
 
