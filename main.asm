@@ -59,12 +59,6 @@ start:
     test eax, eax
     jz @@game_loop ; continue game
 
-	; Wait for keystroke and read character.
-	;mov ah,00h
-	;int 16h
-    ;call disable_video
-
-
 	call end_prog
 
 ; -------------------------------------------------------------------
