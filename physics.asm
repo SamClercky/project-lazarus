@@ -205,7 +205,7 @@ PROC Physics_is_colliding
 
     mov ax, [(Drawable PTR esi).x]
     mov bx, [(Drawable PTR esi).y]
-    dec ebx ; getting up, but may lead to problems in the future
+    dec ebx
     inc eax
     call Physics_point_in_obj, edi, eax, ebx
     test eax, eax
@@ -222,7 +222,7 @@ PROC Physics_is_colliding
     mov bx, [(Drawable PTR esi).y]
     dec eax
     add bx, [(Drawable PTR esi).height]
-    sub ebx, 5 ; getting up, but may lead to problems in the future
+    sub ebx, 5
     call Physics_point_in_obj, edi, eax, ebx
     test eax, eax
     jz @@no_collision
@@ -331,7 +331,7 @@ UDATASEG
 ;; storage pools for the physics engine
 ;; contains pointers to drawable objects
 moving_objects  dd MOVING_OBJECT_MAX_COUNT  DUP(?) ; objects that move (player)
-static_objects  dd STATIC_OBJECT_MAX_COUNT  DUP(?) ; objects that do not move
+static_objects  dd STATIC_OBJECT_MAX_COUNT  DUP(?) ; objects that do not move (sidewalls)
 dynamic_objects dd DYNAMIC_OBJECT_MAX_COUNT DUP(?) ; objects that move but can change (crates)
 
 end

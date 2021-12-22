@@ -17,6 +17,9 @@ CRATE_SPAWN_DELAY equ 120
 
 CRATE_GRAVITY_ADDER equ 5
 
+NEXT_CRATE_X equ 0
+NEXT_CRATE_Y equ 180
+
 CODESEG
 
 PROC Crate_init
@@ -211,9 +214,6 @@ PROC Crate_reset
     ; update level difficulty for crate dynamics
     mov eax, [@@level]
     mov [current_gravity], al
- ;   mov al, [current_gravity]
- ;   add al, CRATE_GRAVITY_ADDER
- ;   mov [current_gravity], al
 
     mov [spawn_crate_timer], 0
     mov ecx, CRATES_MAX_COUNT/8
@@ -236,7 +236,7 @@ crate_metal_filename db "sprites\metal.b", 0
 crate_card_filename db "sprites\card.b", 0
 
 ;; contains next drawable to be drawn in the corner
-nextCrateDrawable Drawable <0,180,20,20,OFFSET crateRockSprite>
+nextCrateDrawable Drawable <NEXT_CRATE_X,NEXT_CRATE_Y,CRATE_WIDTH,CRATE_HEIGHT,OFFSET crateRockSprite>
 
 crate_sprites dd OFFSET crateCardSprite,\
                 OFFSET crateWoodSprite,\

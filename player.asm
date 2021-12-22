@@ -171,7 +171,7 @@ PROC Player_check_dead
     jz @@return
     
     ;; game need to end, because player got squished
-    mov eax, 1 ;game loop stops when eax is 1 in main.asm after Game_update
+    mov eax, 1 
 
 @@return:
     ret

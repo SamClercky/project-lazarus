@@ -37,6 +37,11 @@ GAME_WON equ 3
 
 GAME_STATE_CHANGED_DELAY equ 10
 
+GAME_STATE_TEXT_X EQU 15
+GAME_STATE_TEXT_Y EQU 10
+GAME_START_TEXT_X equ 10
+GAME_START_TEXT_Y equ 11
+
 PROC Game_init
     ;; init rand generator so other functions can use it
     call Utils_rand_init
@@ -99,8 +104,8 @@ game_first_start:
     ;; update screen
     call Drawer_update ;; update after entity update
 
-    call Drawer_draw_txt, 15, 10, OFFSET game_begin_msg
-    call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
+    call Drawer_draw_txt, GAME_STATE_TEXT_X, GAME_STATE_TEXT_Y, OFFSET game_begin_msg
+    call Drawer_draw_txt, GAME_START_TEXT_X, GAME_START_TEXT_Y, OFFSET game_start_msg
     
     jmp @@game_end_update
 
@@ -118,16 +123,16 @@ game_running:
 game_game_won:
     ;; draw winning screen
 
-    call Drawer_draw_txt, 15, 10, OFFSET game_won_msg
-    call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
+    call Drawer_draw_txt, GAME_STATE_TEXT_X, GAME_STATE_TEXT_Y, OFFSET game_won_msg
+    call Drawer_draw_txt, GAME_START_TEXT_X, GAME_START_TEXT_Y, OFFSET game_start_msg
 
     jmp @@game_end_update
 
 game_game_over:
     ;; draw game over screen
 
-    call Drawer_draw_txt, 15, 10, OFFSET game_over_msg
-    call Drawer_draw_txt, 10, 11, OFFSET game_start_msg
+    call Drawer_draw_txt, GAME_STATE_TEXT_X, GAME_STATE_TEXT_Y, OFFSET game_over_msg
+    call Drawer_draw_txt, GAME_START_TEXT_X, GAME_START_TEXT_Y, OFFSET game_start_msg
 
     jmp @@game_end_update
 
@@ -200,7 +205,7 @@ PROC Game_draw_walls
     mov ecx, [@@times_y]
 @@loop_y:
 
-    ;; (re)set x coord
+    ;; (re)set x coordinate
     mov eax, [@@start_x]
     mov [(Drawable PTR esi).x], ax
 
